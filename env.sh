@@ -5,8 +5,8 @@
 
 #c++ header directories
 export CPATH="\
-/mnt/d/abi/projects/valgo-cxx/src:\
-/mnt/d/abi/projects/valgo-cxx/libs/eidheim/sws:\
+/mnt/d/abi/projects/valgo-cpp/src:\
+/mnt/d/abi/projects/valgo-cpp/libs/eidheim/sws:\
 /usr/local/include:\
 /usr/local/include/bsoncxx/v_noabi:\
 /usr/local/include/mongocxx/v_noabi\
