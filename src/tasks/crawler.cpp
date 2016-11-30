@@ -16,6 +16,7 @@
 //library headers
 #include <client_http.hpp>
 #include <bsoncxx/json.hpp>
+#include <htmlcxx/html/ParserDom.h>
 #include <mongocxx/client.hpp>
 #include <mongocxx/cursor.hpp>
 #include <mongocxx/stdx.hpp>
