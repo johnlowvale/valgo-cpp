@@ -2,3 +2,4 @@
 /tarballs
 /**/*.o
 /**/*.md5
+/build
