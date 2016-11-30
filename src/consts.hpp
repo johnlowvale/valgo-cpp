@@ -24,6 +24,7 @@
 
 //number constants
 #define ONE_HOUR_MILLI (60*60*1000)
+#define EXTRACT_LENGTH 100
 
 //string constants
 #define OK                     string("OK")

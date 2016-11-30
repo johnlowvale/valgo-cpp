@@ -339,6 +339,14 @@ string utils::http_post(string Server,string Path,string Body) {
 }
 
 /**
+ * Convert string to lower case
+ */
+string utils::to_lower(string Str) {
+  to_lower(Str);
+  return Str;
+}
+
+/**
  * Convert wstring to string
  * http://stackoverflow.com/questions/15333259/
  * c-stdwstring-to-stdstring-quick-and-dirty-conversion-for-use-as-key-in

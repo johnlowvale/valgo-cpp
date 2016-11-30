@@ -14,8 +14,18 @@
 #include <string>
 #include <vector>
 
+//library headers
+#include <bsoncxx/json.hpp>
+#include <mongocxx/client.hpp>
+
 //standard namespaces used
 using namespace std;
+
+//library namespaces
+using namespace bsoncxx::builder::stream;
+using namespace bsoncxx::document;
+using namespace mongocxx;
+using namespace mongocxx::result;
 
 //namespace path
 namespace Entities {
@@ -39,6 +49,9 @@ namespace Entities {
     public:
       content();
       ~content();
+
+      //db operations
+      void save_to_db(client& Db_Client);
   };
 }//namespace path
 

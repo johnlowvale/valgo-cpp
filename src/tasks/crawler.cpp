@@ -15,6 +15,7 @@
 
 //library headers
 #include <client_http.hpp>
+#include <boost/algorithm/string.hpp>
 #include <bsoncxx/json.hpp>
 #include <htmlcxx/html/ParserDom.h>
 #include <mongocxx/client.hpp>
@@ -28,6 +29,7 @@
 #include <consts.hpp>
 #include <types.hpp>
 #include <server.hpp>
+#include <entities/content.hpp>
 #include <entities/moment.hpp>
 #include <entities/webloc.hpp>
 #include <miscs/db.hpp>
@@ -39,8 +41,11 @@ using namespace std;
 using namespace std::chrono;
 
 //library namespaces
+using namespace boost;
 using namespace bsoncxx::builder::stream;
 using namespace bsoncxx::document;
+using namespace htmlcxx;
+using namespace htmlcxx::HTML;
 using namespace mongocxx;
 using namespace mongocxx::result;
 using bsoncxx::from_json;
@@ -115,7 +120,26 @@ void crawler::reschedule_webloc(webloc* Webloc) {
 }
 
 /**
+ * Get text content inside a DOM node
+ * http://stackoverflow.com/questions/5081181/htmlcxx-c-crawling-html
+ */
+string crawler::get_inner_text(const tree<Node>& Dom,
+const tree<Node>::iterator& Parent) {
+  string Result;
+
+  for (long Index=0; Index<Dom.number_of_children(Parent); Index++) {
+    tree<Node>::iterator It = Dom.child(Parent,Index);
+
+    if (!It->isTag() && !It->isComment()) 
+      Result += It->text();
+  }
+
+  return Result;
+}
+
+/**
  * Crawl the current queue
+ * Library: http://htmlcxx.sourceforge.net/
  */
 void crawler::crawl_the_queue() {
   
@@ -135,8 +159,44 @@ void crawler::crawl_the_queue() {
       Webloc->Domain_Name+":"+to_string(Webloc->Port),Webloc->Path
     );
 
-    cout <<Html.length() <<endl;
-    cout.flush();
+    //get the dom tree
+    ParserDom Parser;
+    tree<Node> Dom = Parser.parseTree(Html);
+    
+    //get title
+    string Title("");
+    for (auto Iterator=Dom.begin(); Iterator!=Dom.end(); Iterator++) {
+      string Tag_Name(Iterator->tagName());
+
+      if (Tag_Name=="title") {
+        Title = this->get_inner_text(Dom,Iterator);
+        break;
+      }
+    }
+
+    //get extract
+    string Extract("");
+    for (auto Iter=Dom.begin(); Iter!=Dom.end(); Iter++) {
+      string Tag_Name(Iter->tagName());
+
+      //get text
+      if (Tag_Name=="div" || Tag_Name=="p" || Tag_Name=="span") {
+        Extract += this->get_inner_text(Dom,Iter);
+        if (Extract.length()>EXTRACT_LENGTH)
+          break;
+      }
+    }
+
+    //make a content object
+    trim(Extract);
+    content Content;
+    Content.Id      = Webloc->Full_Url;
+    Content.Url     = Webloc->Full_Url;
+    Content.Name    = Title;
+    Content.Title   = Title;
+    Content.Extract = Extract;
+    Content.Html    = Html;
+    Content.save_to_db(this->Db_Client); 
   }
 
   this->clear_queue();
