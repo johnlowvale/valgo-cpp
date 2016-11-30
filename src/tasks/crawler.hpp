@@ -56,6 +56,8 @@ namespace Tasks {
       void   reschedule_webloc(webloc* Webloc);
       string get_inner_text(const tree<Node>& Dom,
              const tree<Node>::iterator& Parent);
+      void   add_more_link(vector<string>& More_Links,webloc* Webloc,
+             string& Href);
       void   crawl_the_queue();
       void   run();
   };

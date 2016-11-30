@@ -30,6 +30,7 @@
 #define OK                     string("OK")
 #define FAILED                 string("FAILED")
 #define FAILED_TO_ADD_DOCUMENT string("FAILED_TO_ADD_DOCUMENT")
+#define INVALID                string("INVALID")
 
 //json constants
 #define JSON_MESSAGE_OK    string("{\"Message\":\"OK\"}")

@@ -49,6 +49,9 @@ namespace Entities {
       int64  Added_At;
       long   Visit_Count;
 
+      //not to store in db
+      bool   Is_Valid;
+
       //map time to html, not to add more into this map
       //if current html of the web page stay unchanged
       //THIS PROPERTY IS UNUSED, TOO MANY ENTRIES OF HTML CONTENTS.

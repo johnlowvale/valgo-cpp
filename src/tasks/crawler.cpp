@@ -138,10 +138,29 @@ const tree<Node>::iterator& Parent) {
 }
 
 /**
+ * Solve base url and add href to More_Links 
+ */
+void crawler::add_more_link(vector<string>& More_Links,webloc* Webloc,
+string& Href) {
+  if (Href.substr(0,4)=="http") {
+    More_Links.push_back(Href);
+    return;
+  }
+
+  string Link = Webloc->Protocol+"://"+Webloc->Domain_Name+":"+
+  to_string(Webloc->Port)+Href;
+
+  More_Links.push_back(Link);
+}
+
+/**
  * Crawl the current queue
  * Library: http://htmlcxx.sourceforge.net/
  */
 void crawler::crawl_the_queue() {
+
+  //more links to crawl
+  vector<string> More_Links;
   
   //make a vector of web locations of the queue
   vector<webloc*> Weblocs;
@@ -198,8 +217,9 @@ void crawler::crawl_the_queue() {
       if (Tag_Name=="a" || Tag_Name=="A") {
         Iter->parseAttributes();
 
-        string Attr_Value = Iter->attribute(string("href")).second;
-        Links.push_back(Attr_Value);
+        string Href = Iter->attribute(string("href")).second;
+        Links.push_back(Href);
+        this->add_more_link(More_Links,Webloc,Href);
       }
     }
 
@@ -216,8 +236,21 @@ void crawler::crawl_the_queue() {
     Content.save_to_db(this->Db_Client); 
   }
 
+  //clear previous queue
   this->clear_queue();
-}
+
+  //add more links to the queue
+  for (string Url: More_Links) {
+    webloc* Webloc = new webloc(Url,1); 
+
+    if (Webloc->Is_Valid) {
+      Webloc->save_to_db(this->Db_Client);
+      this->Queue[Url] = Webloc;
+    }
+    else
+      delete Webloc;
+  }//for
+}//crawl the queue
 
 /**
  * Thread method

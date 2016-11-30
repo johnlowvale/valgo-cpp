@@ -57,6 +57,11 @@ webloc::webloc(string Full_Url,double Revisit_Time) {
     Full_Url,
     this->Protocol,this->Domain_Name,this->Port,this->Path,this->Query_String
   ); 
+
+  if (this->Domain_Name.length()>0)
+    this->Is_Valid = true;
+  else
+    this->Is_Valid = false;
 }
 
 /** 
