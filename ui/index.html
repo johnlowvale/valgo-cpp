@@ -1,0 +1,60 @@
+<!doctype html>
+<!--
+ * vAlgo++ UI (for testing purpose)
+ * Copyright (c) Abivin JSC
+ * @file    Main UI file
+ * @version 0.1
+ * @author  Dat Dinhquoc
+ *-->
+<html>
+  <head>
+    <title>Abivin vAlgo++ UI</title>
+
+    <!--js-->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="index.js"></script>
+
+    <!--css-->
+    <link rel="stylesheet" href="index.css"/>
+  </head>
+
+  <body>
+    <div>Server Status: <span id="Server-Status"></span></div>
+    <hr/>
+
+    <!--web location adding box-->
+    <div>
+      New Web Location (URL): 
+      <input id="Nwl-Url" value="http://example.com" 
+      onclick="this.value='';"/> -
+
+      Revisit Time (Hours): 
+      <input id="Nwl-Revisit-Time" value="1"
+      onclick="this.value='';"/><br/>
+
+      <button onclick="add_web_location();">Add This Web Location</button>
+    </div>
+    <hr/>
+
+    <!--crawler stats box-->
+    <div>
+      Statuses of Crawlers:<br/>
+      <table id="Status-Table-Of-Crawlers">
+        <tr>
+          <td>Index</td>
+          <td>Queue Length</td>
+          <td>URL in Front of Queue</td>
+        </tr>
+        <tr>
+          <td>0</td>
+          <td>0</td>
+          <td>http://somedomain.ext/some/path</td>
+        </tr>
+      </table>
+
+      <button>Get Crawlers' Statuses</button>
+    </div>
+  </body>
+</html>
+
+<!--end of file-->
