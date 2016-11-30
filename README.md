@@ -8,3 +8,4 @@
 * MongoDB C++ Driver
 * Simple Web Server
 * URI Parser (liburiparser-dev)
+* HTML Cxx (libhtmlcxx-dev)
