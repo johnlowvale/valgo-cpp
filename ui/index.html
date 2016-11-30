@@ -40,26 +40,30 @@
     <div>
       Statuses of Crawlers:<br/>
       <table id="Status-Table-Of-Crawlers">
-        <tr>
-          <td>Index</td>
-          <td>Queue Length</td>
-          <td>URL in Front of Queue</td>
-        </tr>
-        <tr>
-          <td>0</td>
-          <td>0</td>
-          <td>http://somedomain.ext/some/path</td>
-        </tr>
+        <thead>
+          <tr>
+            <td>Index</td>
+            <td>Queue Length</td>
+            <td>Crawling URL</td>
+          </tr>
+        </thead>
+        <tbody id="Crawler-Statuses">
+          <tr>
+            <td>0</td>
+            <td>0</td>
+            <td>http://somedomain.ext/some/path</td>
+          </tr>
+        </tbody>
       </table>
 
-      <button>Get Crawlers' Statuses</button>
+      <button onclick="get_crawlers_statuses()">Get Crawlers' Statuses</button>
     </div>
     <hr/>
 
     <!--test search-->
     <div>
       Text to search: <input id="Search-Text"/><br/>
-      <button>Do searching!</button><br/>
+      <button onclick="search_for_text();">Do searching!</button><br/>
     </div>
   </body>
 </html>

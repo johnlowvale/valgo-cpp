@@ -120,6 +120,40 @@ void server::handle_post_webloc_add(response Response,request Request) {
 }
 
 /**
+ * Handle /crawlers/statuses URL
+ */
+void server::handle_post_crawlers_statuses(response Response,request Request) {
+  utils::print_request(Request);
+
+  //get request data
+  ptree Content = utils::get_request_content_ptree(Request);
+
+  //result
+  ptree Result;
+  ptree Statuses;
+
+  for (long Index=0; Index<server::CRAWLER_COUNT; Index++) {
+    crawler* Crawler = server::Singleton->Crawlers[Index];
+    ptree    Status;
+
+    Status.put("Index",       Index);
+    Status.put("Queue_Length",Crawler->Queue.size());
+    Status.put("Current_Url", Crawler->Current_Url);
+
+    Statuses.push_back(make_pair("",Status));
+  }
+
+  Result.add_child("Crawlers",Statuses);
+
+  //log
+  string Json_Str = utils::dump_to_json_str(Result);
+  cout <<"\nCrawlers' statuses:" <<endl;
+  cout <<Json_Str <<endl;
+
+  utils::send_json(Response,Json_Str);
+}
+
+/**
  * Create indices in db
  */
 void server::create_indices() {
@@ -161,6 +195,9 @@ void server::initialise() {
 
   this->Http_Server->resource["^/webloc/add$"]["POST"] = 
   server::handle_post_webloc_add;
+
+  this->Http_Server->resource["^/crawlers/statuses$"]["POST"] = 
+  server::handle_post_crawlers_statuses;
 }
 
 /**
@@ -183,6 +220,7 @@ void server::update_past_weblocs() {
   cursor Cursor = db::find(this->Db_Client,"weblocs",Value);
 
   //update Revisit_At to make it a time in future
+  long Update_Count = 0;
   for (view View: Cursor) {
     //int64 Revisit_At = View["Revisit_At"].get_date().to_int64();
 
@@ -191,20 +229,21 @@ void server::update_past_weblocs() {
 
     //update the webloc
     value Find_Value = document{}
-      <<"_id" <<View["_id"].get_utf8().value.to_string()
+    <<"_id" <<View["_id"].get_utf8().value.to_string()
     <<finalize;
 
     value Update_Value = document{}
-      <<"$set"
-      <<open_document
-        <<"Revisit_At" <<b_date(milliseconds(Revisit_At))
-      <<close_document
+    <<"$set"
+    <<open_document
+      <<"Revisit_At" <<b_date(milliseconds(Revisit_At))
+    <<close_document
     <<finalize;
 
     try {
       db::update_one(this->Db_Client,"weblocs",Find_Value,Update_Value);
-      cout <<"Updated visit schedule for ";
-      cout <<View["_id"].get_utf8().value.to_string() <<endl;
+      Update_Count++;
+      //cout <<"Updated visit schedule for ";
+      //cout <<View["_id"].get_utf8().value.to_string() <<endl;
     }
     catch (operation_exception& Exception) {
       cout <<"Update visit schedule failed for ";
@@ -212,6 +251,8 @@ void server::update_past_weblocs() {
       cout <<to_json(Exception.raw_server_error().value()) <<endl;
     }
   }
+
+  cout <<"Updated schedules for " <<Update_Count <<" Url(s)" <<endl;
 }
 
 /**

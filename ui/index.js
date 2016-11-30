@@ -80,6 +80,45 @@ function add_web_location() {
 }
 
 /**
+ * Get crawlers' statuses
+ */
+function get_crawlers_statuses() {
+  $.post("http://localhost:8891/crawlers/statuses",JSON.stringify({})).
+  done(function(Data){
+    if (Data.Error) {
+      alert("Error: "+JSON.stringify(Data.Error));
+      return;
+    }
+
+    var Crawlers = Data.Crawlers;
+    var Html     = "";
+    for (var Index=0; Index<Crawlers.length; Index++) {
+      var Crawler = Crawlers[Index];
+      var Tr      = "";
+
+      Tr += "<tr>";
+      Tr += "<td>"+Crawler.Index+"</td>";
+      Tr += "<td>"+Crawler.Queue_Length+"</td>";
+      Tr += "<td>"+Crawler.Current_Url+"</td>";
+      Tr += "</tr>";
+
+      Html += Tr;
+    }
+
+    $("#Crawler-Statuses").html(Html);
+  }).
+  fail(function(Data){
+    alert("Error: "+JSON.stringify(Data));
+  });
+}
+
+/**
+ * Search for text
+ */
+function search_for_text() {
+}
+
+/**
  * Entry point of web application
  */
 $(function(){

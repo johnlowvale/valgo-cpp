@@ -45,6 +45,7 @@ namespace Tasks {
       client              Db_Client;
       map<string,webloc*> Queue;
       bool                Is_Queuing;
+      string              Current_Url;
 
     //public constructors and methods
     public:

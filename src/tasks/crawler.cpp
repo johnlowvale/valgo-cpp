@@ -174,6 +174,10 @@ void crawler::crawl_the_queue() {
 
   //crawl all web locations in queue
   for (webloc* Webloc: Weblocs) {
+    this->Current_Url = 
+    Webloc->Domain_Name+":"+to_string(Webloc->Port)+Webloc->Path;
+
+    //get web contents
     string Html = utils::http_get(
       Webloc->Domain_Name+":"+to_string(Webloc->Port),Webloc->Path
     );
