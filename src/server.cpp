@@ -131,6 +131,12 @@ void server::create_indices() {
     "Revisit_At": 1
   })");
 
+  //contents
+  cout <<"contents.*" <<endl;
+  db::create_index(this->Db_Client,"contents","Wildcard",R"({
+    "$**": "text"
+  })");  
+
   cout <<"Indices created." <<endl <<endl;
 }
 
