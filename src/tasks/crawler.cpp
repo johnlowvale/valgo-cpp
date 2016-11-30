@@ -180,8 +180,11 @@ void crawler::crawl_the_queue() {
       string Tag_Name(Iter->tagName());
 
       //get text
-      if (Tag_Name=="div" || Tag_Name=="p" || Tag_Name=="span") {
-        Extract += this->get_inner_text(Dom,Iter);
+      if (Tag_Name=="div" || Tag_Name=="p" || Tag_Name=="span" ||
+      Tag_Name=="h1" || Tag_Name=="h2" || Tag_Name=="h3" || Tag_Name=="h4" ||
+      Tag_Name=="h5" || Tag_Name=="h6" || Tag_Name=="b" || Tag_Name=="i" ||
+      Tag_Name=="u" || Tag_Name=="a") {
+        Extract += " "+this->get_inner_text(Dom,Iter);
         if (Extract.length()>EXTRACT_LENGTH)
           break;
       }
@@ -209,7 +212,7 @@ void crawler::crawl_the_queue() {
     Content.Title   = Title;
     Content.Extract = Extract;
     Content.Html    = Html;
-    Content.Links   = Links; 
+    Content.Links   = Links;
     Content.save_to_db(this->Db_Client); 
   }
 
