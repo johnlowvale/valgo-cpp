@@ -166,7 +166,7 @@ echo "Linking object files to executable..."
 cd ../build
 g++-6 -std=c++14 -Wall -Wfatal-errors -pthread -o server \
 server.o crawler.o utils.o db.o moment.o webloc.o content.o relation.o \
-node.o graph.o -lboost_system -lbsoncxx -lmongocxx
+node.o graph.o -lboost_system -lbsoncxx -lmongocxx -luriparser
 echo "Linked."
 echo ""
 

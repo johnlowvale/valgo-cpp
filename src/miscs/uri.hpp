@@ -3,15 +3,7 @@
  * Copyright (c) Abivin JSC
  * @file    URI parser class header file
  * @version 0.1
- * @author  http://stackoverflow.com/users/882436/tom
- * @updater Dat Dinhquoc
- *
- * Reference:
- * http://stackoverflow.com/questions/2616011/
- * easy-way-to-parse-a-url-in-c-cross-platform
- *
- * Notes:
- * Converted to class instead of struct
+ * @author  Dat Dinhquoc
  */
 
 //include guard begin
@@ -20,7 +12,6 @@
 
 //standard c++ headers
 #include <string>
-#include <algorithm> //find
 
 //standard c++ namespaces
 using namespace std;
@@ -40,7 +31,7 @@ namespace Miscs {
 
     //public static methods
     public:
-      static uri parse(wstring& Full_Uri);
+      static uri parse(const wstring& Full_Uri);
       static uri parse(string& Full_Uri);
   };//uri
 

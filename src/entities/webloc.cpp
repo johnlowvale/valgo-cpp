@@ -56,16 +56,7 @@ webloc::webloc(string Full_Url,double Revisit_Time) {
   utils::parse_url(
     Full_Url,
     this->Protocol,this->Domain_Name,this->Port,this->Path,this->Query_String
-  );
-
-  cout <<"------------------" <<endl;
-  cout <<this->Protocol <<endl;
-  cout <<this->Domain_Name <<endl;
-  cout <<this->Port <<endl;
-  cout <<this->Path <<endl;
-  cout <<this->Query_String <<endl;
-  cout <<"----------------" <<endl;
-  cout.flush();
+  ); 
 }
 
 /** 

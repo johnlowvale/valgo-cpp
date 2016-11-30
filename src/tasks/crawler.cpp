@@ -130,7 +130,10 @@ void crawler::crawl_the_queue() {
 
   //crawl all web locations in queue
   for (webloc* Webloc: Weblocs) {
-    string Html = utils::http_get(Webloc->Domain_Name+str(Webloc->Port),"/");
+    string Html = utils::http_get(
+      Webloc->Domain_Name+":"+to_string(Webloc->Port),Webloc->Path
+    );
+
     cout <<Html.length() <<endl;
     cout.flush();
   }

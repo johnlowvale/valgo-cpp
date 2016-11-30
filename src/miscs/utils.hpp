@@ -19,6 +19,7 @@
 #include <client_http.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <bsoncxx/types.hpp>
+#include <uriparser/Uri.h>
 
 //in-project headers
 #include <types.hpp>
@@ -79,6 +80,7 @@ namespace Miscs {
       //url & html
       static string  wstring_to_string(wstring& Wstring);
       static wstring string_to_wstring(string& String);
+      static string  path_segments_to_str(UriPathSegmentA* Segment);
       static void    parse_url(string Full_Url,string& Protocol,
                      string& Domain_Name,long& Port,string& Path,
                      string& Query_String);

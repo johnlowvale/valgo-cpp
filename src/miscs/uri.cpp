@@ -24,7 +24,7 @@ using namespace Miscs;
 /**
  * Parse a URI into parts  (wide string)
  */
-uri uri::parse(wstring& Full_Uri) {
+uri uri::parse(const wstring& Full_Uri) { 
   uri result;
 
   typedef std::wstring::const_iterator iterator_t;

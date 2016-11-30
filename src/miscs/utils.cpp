@@ -20,10 +20,10 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <bsoncxx/types.hpp>
+#include <uriparser/Uri.h>
 
 //in-project headers
 #include <entities/moment.hpp>
-#include <miscs/uri.hpp>
 #include <miscs/utils.hpp>
 
 //standard c++ namespaces
@@ -343,7 +343,7 @@ string utils::http_post(string Server,string Path,string Body) {
  * http://stackoverflow.com/questions/15333259/
  * c-stdwstring-to-stdstring-quick-and-dirty-conversion-for-use-as-key-in
  */
-string utils::wstring_to_string(wstring& Wstring) {
+string utils::wstring_to_string(wstring& Wstring) { 
   string Str(
     (const char*)&Wstring[0], 
     sizeof(wchar_t)/sizeof(char)*Wstring.size()
@@ -367,18 +367,67 @@ wstring utils::string_to_wstring(string& String) {
 }
 
 /**
+ * Uri path segments to string
+ * See example by Elliot Cameron:
+ * http://stackoverflow.com/questions/2616011/
+ * easy-way-to-parse-a-url-in-c-cross-platform
+ */
+string utils::path_segments_to_str(UriPathSegmentA* Segment) {
+  string                 Delim("/");
+  string                 Accum; 
+  UriPathSegmentStructA* Head(Segment);
+
+  while (Head) {
+    cout <<0; cout.flush();
+    Accum += Delim+string(Head->text.first,Head->text.afterLast); 
+    Head   = Head->next;
+  }
+
+  return Accum;
+}
+
+/**
  * Parse url (including protocol) into parts
+ * See example by Elliot Cameron:
+ * http://stackoverflow.com/questions/2616011/
+ * easy-way-to-parse-a-url-in-c-cross-platform
  */
 void utils::parse_url(string Full_Url,string& Protocol,string& Domain_Name,
 long& Port,string& Path,string& Query_String) {
-  uri Uri = uri::parse(Full_Url);
+  UriParserStateA State;
+  UriUriA         Uri;
 
-  //get values
-  Protocol     = Uri.Protocol;
-  Domain_Name  = Uri.Host;
-  Port         = stol(Uri.Port);
-  Path         = Uri.Path;
-  Query_String = Uri.Query_String;
+  //parse
+  State.uri = &Uri;
+  if (uriParseUriA(&State,Full_Url.c_str())!=URI_SUCCESS) {
+    uriFreeUriMembersA(&Uri);
+    return;
+  }
+
+  //for conversion to integer
+  string Port_Str; 
+
+  //get members
+  Protocol     = string(Uri.scheme.first,Uri.scheme.afterLast);
+  Domain_Name  = string(Uri.hostText.first,Uri.hostText.afterLast);
+  Port_Str     = string(Uri.portText.first,Uri.portText.afterLast);
+  Path         = utils::path_segments_to_str(Uri.pathHead);
+  Query_String = string(Uri.query.first,Uri.query.afterLast);
+  
+  if (Port_Str.length()==0) {
+    if (Protocol=="http")
+      Port = 80;
+    else
+    if (Protocol=="https")
+      Port = 443;
+    else
+      Port = 0;
+  }
+  else
+    Port = stol(Port_Str);
+
+  //free resources
+  uriFreeUriMembersA(&Uri);
 }
 
 /**
