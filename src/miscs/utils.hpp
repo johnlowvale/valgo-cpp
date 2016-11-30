@@ -78,7 +78,7 @@ namespace Miscs {
       static string http_post(string Server,string Path,string Body);
 
       //url & html
-      static string  to_lower(string Str);
+      static void    to_lower(string& Str);
       static string  wstring_to_string(wstring& Wstring);
       static wstring string_to_wstring(string& String);
       static string  path_segments_to_str(UriPathSegmentA* Segment);

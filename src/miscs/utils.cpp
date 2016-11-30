@@ -341,9 +341,8 @@ string utils::http_post(string Server,string Path,string Body) {
 /**
  * Convert string to lower case
  */
-string utils::to_lower(string Str) {
-  to_lower(Str);
-  return Str;
+void utils::to_lower(string& Str) {
+  to_lower(Str); //boost::to_lower
 }
 
 /**

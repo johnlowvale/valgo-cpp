@@ -55,6 +55,13 @@ void content::save_to_db(client& Db_Client) {
   <<"Extract" <<this->Extract
   <<"Html"    <<this->Html;
 
+  //links
+  auto Array = Doc <<"Links" <<open_array;
+  for (string Str: this->Links) {
+    Array <<Str;
+  }
+  Array <<close_array;
+
   //insert
   try {
     db::insert_one(Db_Client,"contents",Doc);

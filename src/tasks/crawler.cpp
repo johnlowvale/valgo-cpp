@@ -187,6 +187,19 @@ void crawler::crawl_the_queue() {
       }
     }
 
+    //get links
+    vector<string> Links;
+    for (auto Iter=Dom.begin(); Iter!=Dom.end(); Iter++) {
+      string Tag_Name(Iter->tagName());
+
+      if (Tag_Name=="a" || Tag_Name=="A") {
+        Iter->parseAttributes();
+
+        string Attr_Value = Iter->attribute(string("href")).second;
+        Links.push_back(Attr_Value);
+      }
+    }
+
     //make a content object
     trim(Extract);
     content Content;
@@ -196,6 +209,7 @@ void crawler::crawl_the_queue() {
     Content.Title   = Title;
     Content.Extract = Extract;
     Content.Html    = Html;
+    Content.Links   = Links; 
     Content.save_to_db(this->Db_Client); 
   }
 

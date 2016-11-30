@@ -43,6 +43,7 @@ namespace Entities {
       string           Title;   //long name
       string           Extract; //html extract
       string           Html;    //full html
+      vector<string>   Links;
       vector<content*> Children;
 
     //public constructor and methods
