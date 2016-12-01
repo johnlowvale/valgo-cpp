@@ -283,6 +283,9 @@ $(function(){
   $.get("http://localhost:8891").
   done(function(Data){
     $("#Server-Status").html(Data);
+
+    //get crawlers' statuses after every 5s
+    setTimeout(get_crawlers_statuses,5*1000);
   }).
   fail(function(Data){
     $("#Server-Status").html(JSON.stringify(Data));
