@@ -194,6 +194,24 @@ value& Value,long Limit) {
 }
 
 /**
+ * Count documents in collection
+ */
+int64 db::count(client& Db_Client,const char* Collection_Name,
+value& Value,long Limit) {
+  if (Limit==0)
+    return Db_Client[db::DB_NAME][Collection_Name].count(Value.view());
+  else {
+    options::count Options;
+    Options.limit(Limit);
+
+    return Db_Client[db::DB_NAME][Collection_Name].count(
+      Value.view(),
+      Options
+    );
+  }//else
+}
+
+/**
  * Update one document
  */
 void db::update_one(client& Db_Client,const char* Collection_Name,

@@ -80,6 +80,8 @@ namespace Miscs {
                     const char* Index_Name,const char* Index_Info);
       static cursor find(client& Db_Client,const char* Collection_Name,
                     value& Value,long Limit=0);
+      static int64  count(client& Db_Client,const char* Collection_Name,
+                    value& Value,long Limit=0);
       static void   update_one(client& Db_Client,const char* Collection_Name,
                     value& Find_Value,value& Update_Value);
   };

@@ -179,6 +179,17 @@ void crawler::crawl_the_queue() {
     this->Current_Url = 
     Webloc->Domain_Name+":"+to_string(Webloc->Port)+Webloc->Path;
 
+    //skip url if already in db
+    value Count_Val = document{}
+    <<"_id" <<Webloc->Protocol+"://"+this->Current_Url
+    <<finalize;
+    int64 Url_Count = db::count(this->Db_Client,"weblocs",Count_Val,1);
+
+    if (Url_Count==1) {
+      this->Current_Index++;
+      continue;
+    }
+
     //get web contents
     string Html = utils::http_get(
       Webloc->Domain_Name+":"+to_string(Webloc->Port),Webloc->Path
