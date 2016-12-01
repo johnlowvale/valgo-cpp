@@ -285,7 +285,7 @@ $(function(){
     $("#Server-Status").html(Data);
 
     //get crawlers' statuses after every 5s
-    setTimeout(get_crawlers_statuses,5*1000);
+    setInterval(get_crawlers_statuses,5*1000);
   }).
   fail(function(Data){
     $("#Server-Status").html(JSON.stringify(Data));
