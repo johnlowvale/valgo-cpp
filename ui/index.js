@@ -204,6 +204,13 @@ function search_for_text() {
 }
 
 /**
+ * Clear search result
+ */
+function clear_search_results() {
+  $("#Search-Result-Box").html("");
+}
+
+/**
  * Check enter key to do searching
  */
 function check_enter_key(Event) {
