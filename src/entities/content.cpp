@@ -12,6 +12,7 @@
 #include <mongocxx/exception/operation_exception.hpp>
 
 //in-project headers
+#include <consts.hpp>
 #include <entities/content.hpp>
 #include <miscs/db.hpp>
 
@@ -45,7 +46,7 @@ content::~content() {
 /**
  * Save to db
  */
-void content::save_to_db(client& Db_Client) {
+string content::save_to_db(client& Db_Client) {
   document Doc;
   Doc
   <<"_id"     <<this->Id
@@ -65,13 +66,11 @@ void content::save_to_db(client& Db_Client) {
   //insert
   try {
     db::insert_one(Db_Client,"contents",Doc);
-    cout <<"\nContent saved from " <<this->Url <<endl;
+    return OK;
   }
   catch (operation_exception& Exception) {
-    cout <<endl 
-    <<Exception.raw_server_error().value().view()["writeErrors"][0]["errmsg"].
-      get_utf8().value.to_string()
-    <<endl;
+    return Exception.raw_server_error().value().
+    view()["writeErrors"][0]["errmsg"].get_utf8().value.to_string();
   }
 }
 

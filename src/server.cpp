@@ -468,7 +468,7 @@ void server::queue_single_webloc(webloc* Webloc) {
  * Autobalance the queues of crawlers, make these queues have rather
  * similar numbers of urls
  */
-void server::autobalance_queues() {
+void server::autobalance_queues() { return;
   vector<webloc*> Weblocs;
 
   //collect all weblocs from all queues

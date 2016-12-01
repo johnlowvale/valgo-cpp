@@ -207,28 +207,14 @@ void crawler::crawl_the_queue() {
   for (webloc* Webloc: Weblocs) {
     this->Current_Url = Webloc->Full_Url;
 
-    //skip url if already in db
-    //not supposed to skip, html contents to be updated based on Revisit_Time
-    /*
-    value Count_Val = document{}
-    <<"_id" <<this->Current_Url
-    <<finalize;
-    int64 Url_Count = db::count(this->Db_Client,"weblocs",Count_Val,1);
-
-    if (Url_Count==1) {
-      this->Queue.erase(this->Queue.find(Webloc->Full_Url));
-      this->Current_Index++;
-      continue;
-    }
-    */
-
     //get web contents
-    cout <<"\nMaking HTTP GET request:" <<endl;
-    cout <<Webloc->Domain_Name+":"+to_string(Webloc->Port) <<Webloc->Path <<endl;
+    stringstream Out;
+    Out <<"\nCrawler " <<this->Thread_Index<<", making HTTP GET request:"<<endl;
+    Out <<Webloc->Domain_Name+":"+to_string(Webloc->Port) <<Webloc->Path <<endl;
     if (Webloc->Query_String.length()>0)
-      cout <<Webloc->Query_String <<endl;
+      Out <<Webloc->Query_String <<endl;
     else
-      cout <<"NO_QUERY_STRING" <<endl;
+      Out <<"NO_QUERY_STRING" <<endl;
 
     string Html;
     try {
@@ -236,11 +222,11 @@ void crawler::crawl_the_queue() {
         Webloc->Domain_Name+":"+to_string(Webloc->Port),
         Webloc->Path+"?"+Webloc->Query_String
       );
-      cout <<"OK" <<endl;
+      Out <<"Web page loaded OK" <<endl;
     }
     catch (invalid_argument& Error) {
       Html = "FAILED_TO_DO_HTTP_GET";
-      cout <<"Error: " <<Error.what() <<endl;
+      Out <<"Error: " <<Error.what() <<endl;
     }
 
     //get the dom tree
@@ -298,7 +284,17 @@ void crawler::crawl_the_queue() {
     Content.Extract = Extract;
     Content.Html    = Html;
     Content.Links   = Links;
-    Content.save_to_db(this->Db_Client);
+
+    //save content
+    string Result = Content.save_to_db(this->Db_Client);
+    if (Result==OK)
+      Out <<"Saved." <<endl;
+    else
+      Out <<"Error: " <<Result <<endl;
+
+    //log
+    cout <<Out.str();
+    cout.flush();
 
     //remove from queue
     this->Queue.erase(this->Queue.find(Webloc->Full_Url));
@@ -308,6 +304,7 @@ void crawler::crawl_the_queue() {
   }
 
   //add more links to the queue
+  stringstream Out;
   for (string Url: More_Links) {
     webloc* Webloc = new webloc(Url,1); 
 
@@ -316,11 +313,14 @@ void crawler::crawl_the_queue() {
       this->Queue[Url] = Webloc;
     }
     else {
-      cout <<"\nInvalid URL found:" <<endl;
-      cout <<Url <<endl;
+      Out <<"\nInvalid URL found:" <<endl;
+      Out <<Url <<endl;
       delete Webloc;
     }
   }//for
+
+  cout <<Out.str();
+  cout.flush();
 }//crawl the queue
 
 /**

@@ -52,7 +52,7 @@ namespace Entities {
       ~content();
 
       //db operations
-      void save_to_db(client& Db_Client);
+      string save_to_db(client& Db_Client);
   };
 }//namespace path
 
