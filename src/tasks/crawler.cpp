@@ -223,9 +223,24 @@ void crawler::crawl_the_queue() {
     */
 
     //get web contents
-    string Html = utils::http_get(
-      Webloc->Domain_Name+":"+to_string(Webloc->Port),Webloc->Path
-    );
+    cout <<Webloc->Domain_Name+":"+to_string(Webloc->Port) <<Webloc->Path <<endl;
+    if (Webloc->Query_String.length()>0)
+      cout <<Webloc->Query_String <<endl;
+    else
+      cout <<"NO_QUERY_STRING" <<endl;
+
+    string Html;
+    try {
+      Html = utils::http_get(
+        Webloc->Domain_Name+":"+to_string(Webloc->Port),
+        Webloc->Path+"?"+Webloc->Query_String
+      );
+      cout <<"OK" <<endl;
+    }
+    catch (invalid_argument& Error) {
+      Html = "FAILED_TO_DO_HTTP_GET";
+      cout <<"Error: " <<Error.what() <<endl;
+    }
 
     //get the dom tree
     ParserDom Parser;
