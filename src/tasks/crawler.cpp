@@ -320,6 +320,9 @@ void crawler::run() {
       //do nothing
     }
 
+    //tell url distributor to redistribute
+    server::Singleton->autobalance_queues();
+
     //bulk printing thru' stringstream
     stringstream Out;
     Out <<"\nCrawler thread index " <<this->Thread_Index <<endl;

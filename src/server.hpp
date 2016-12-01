@@ -75,6 +75,7 @@ class server {
     bool is_not_queued(webloc* Webloc);
     void queue_weblocs();
     void queue_single_webloc(webloc* Webloc);
+    void autobalance_queues();
     void run();
 };
 
