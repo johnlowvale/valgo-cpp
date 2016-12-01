@@ -223,6 +223,7 @@ void crawler::crawl_the_queue() {
     */
 
     //get web contents
+    cout <<"\nMaking HTTP GET request:" <<endl;
     cout <<Webloc->Domain_Name+":"+to_string(Webloc->Port) <<Webloc->Path <<endl;
     if (Webloc->Query_String.length()>0)
       cout <<Webloc->Query_String <<endl;
