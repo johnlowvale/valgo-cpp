@@ -195,6 +195,36 @@ void server::handle_post_crawlers_statuses(response Response,request Request) {
 }
 
 /**
+ * Handle /crawlers/queues/clear URL
+ */
+void server::handle_post_crawlers_queues_clear(
+response Response,request Request) {
+  utils::print_request(Request);
+
+  //get request data
+  ptree Content = utils::get_request_content_ptree(Request);
+
+  //log
+  stringstream Out;
+
+  //clear all crawlers' queues
+  for (long Index=0; Index<server::CRAWLER_COUNT; Index++) {
+    crawler* Crawler = server::Singleton->Crawlers[Index];
+
+    Out <<"Clearing " <<Crawler->Queue.size() <<" URL(s) from crawler "
+    <<Index <<endl;
+    Crawler->clear_queue();
+  }
+
+  //log
+  Out <<"Cleared." <<endl;
+  cout <<Out.str();
+  cout.flush();
+
+  utils::send_json(Response,JSON_MESSAGE_OK);
+}
+
+/**
  * Handle /search URL
  */
 void server::handle_post_search(response Response,request Request) {
@@ -290,6 +320,9 @@ void server::initialise() {
 
   this->Http_Server->resource["^/crawlers/statuses$"]["POST"] = 
   server::handle_post_crawlers_statuses;
+
+  this->Http_Server->resource["^/crawlers/queues/clear$"]["POST"] = 
+  server::handle_post_crawlers_queues_clear;
 
   this->Http_Server->resource["^/search$"]["POST"] = 
   server::handle_post_search;

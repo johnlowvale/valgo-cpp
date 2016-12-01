@@ -66,6 +66,8 @@ class server {
     static void handle_post_webloc_crawl(response Response,request Request);
     static void handle_post_crawlers_statuses(
                 response Response,request Request);
+    static void handle_post_crawlers_queues_clear(
+                response Response,request Request);
     static void handle_post_search(response Response,request Request);
 
     //methods

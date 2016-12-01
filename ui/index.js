@@ -151,6 +151,24 @@ function get_crawlers_statuses() {
 }
 
 /**
+ * Clear crawlers' queues
+ */
+function clear_crawlers_queues() {
+  $.post("http://localhost:8891/crawlers/queues/clear",JSON.stringify({})).
+  done(function(Data){
+    if (Data.Error) {
+      alert("Error: "+JSON.stringify(Data.Error));
+      return;
+    }
+
+    alert("All crawlers' queues cleared!");    
+  }).
+  fail(function(Data){
+    alert("Error: "+JSON.stringify(Data));
+  });
+}
+
+/**
  * Search for text
  */
 function search_for_text() {

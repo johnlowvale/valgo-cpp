@@ -71,7 +71,6 @@ crawler::crawler(long Thread_Index) {
   this->Thread_Index  = Thread_Index;
   this->Db_Client     = db::get_client();
   this->Is_Queuing    = false;
-  this->Current_Index = 0;
 }
 
 /**
@@ -192,19 +191,9 @@ void crawler::crawl_the_queue() {
   //more links to crawl
   vector<string> More_Links;
   
-  //make a vector of web locations of the queue
-  vector<webloc*> Weblocs;
-  for (auto& Iterator: this->Queue)
-    Weblocs.push_back(Iterator.second);
-
-  //sort the queue by Revisit_At
-  sort(Weblocs.begin(),Weblocs.end(),[](webloc* A,webloc* B)->bool{
-    return A->Revisit_At < B->Revisit_At;
-  });
-
   //crawl all web locations in queue
-  this->Current_Index = 0;
-  for (webloc* Webloc: Weblocs) {
+  while (!this->Queue.empty()) {
+    webloc* Webloc    = this->Queue.begin()->second;
     this->Current_Url = Webloc->Full_Url;
 
     //get web contents
@@ -303,10 +292,9 @@ void crawler::crawl_the_queue() {
     cout.flush();
 
     //remove from queue
-    this->Queue.erase(this->Queue.find(Webloc->Full_Url));
-
-    //index in the sorted vector
-    this->Current_Index++;
+    auto Iter = this->Queue.find(Webloc->Full_Url);
+    if (Iter!=this->Queue.end())
+      this->Queue.erase(Iter);
   }
 
   //add more links to the queue
