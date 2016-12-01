@@ -68,9 +68,10 @@ crawler::crawler() {
  * Constructor with the index of thread
  */
 crawler::crawler(long Thread_Index) {
-  this->Thread_Index = Thread_Index;
-  this->Db_Client    = db::get_client();
-  this->Is_Queuing   = false;
+  this->Thread_Index  = Thread_Index;
+  this->Db_Client     = db::get_client();
+  this->Is_Queuing    = false;
+  this->Current_Index = 0;
 }
 
 /**
@@ -173,6 +174,7 @@ void crawler::crawl_the_queue() {
   });
 
   //crawl all web locations in queue
+  this->Current_Index = 0;
   for (webloc* Webloc: Weblocs) {
     this->Current_Url = 
     Webloc->Domain_Name+":"+to_string(Webloc->Port)+Webloc->Path;
@@ -238,6 +240,8 @@ void crawler::crawl_the_queue() {
     Content.Html    = Html;
     Content.Links   = Links;
     Content.save_to_db(this->Db_Client); 
+
+    this->Current_Index++;
   }
 
   //clear previous queue

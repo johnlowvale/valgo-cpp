@@ -137,7 +137,7 @@ void server::handle_post_crawlers_statuses(response Response,request Request) {
     ptree    Status;
 
     Status.put("Index",       Index);
-    Status.put("Queue_Length",Crawler->Queue.size());
+    Status.put("Queue_Length",Crawler->Queue.size()-Crawler->Current_Index);
     Status.put("Current_Url", Crawler->Current_Url);
 
     Statuses.push_back(make_pair("",Status));
@@ -252,7 +252,7 @@ void server::update_past_weblocs() {
     }
   }
 
-  cout <<"Updated schedules for " <<Update_Count <<" Url(s)" <<endl;
+  cout <<"Updated schedules for " <<Update_Count <<" URL(s)" <<endl;
 }
 
 /**
