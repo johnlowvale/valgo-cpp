@@ -68,9 +68,10 @@ crawler::crawler() {
  * Constructor with the index of thread
  */
 crawler::crawler(long Thread_Index) {
-  this->Thread_Index  = Thread_Index;
-  this->Db_Client     = db::get_client();
-  this->Is_Queuing    = false;
+  this->Thread_Index        = Thread_Index;
+  this->Db_Client           = db::get_client();
+  this->Is_Queuing          = false;
+  this->Need_To_Clear_Queue = false;
 }
 
 /**
@@ -295,6 +296,19 @@ void crawler::crawl_the_queue() {
     auto Iter = this->Queue.find(Webloc->Full_Url);
     if (Iter!=this->Queue.end())
       this->Queue.erase(Iter);
+
+    //check clear queue flag
+    if (this->Need_To_Clear_Queue) {
+      this->clear_queue();
+      this->Need_To_Clear_Queue = false;
+
+      stringstream Out;
+      Out <<"\nCrawler " <<this->Thread_Index <<" cleared queue!" <<endl;
+      cout <<Out.str();
+      cout.flush();
+
+      return;
+    }
   }
 
   //add more links to the queue

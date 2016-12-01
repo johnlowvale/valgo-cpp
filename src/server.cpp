@@ -213,11 +213,11 @@ response Response,request Request) {
 
     Out <<"Clearing " <<Crawler->Queue.size() <<" URL(s) from crawler "
     <<Index <<endl;
-    Crawler->clear_queue();
+    Crawler->Need_To_Clear_Queue = true;
   }
 
   //log
-  Out <<"Cleared." <<endl;
+  Out <<"Clearing messages sent." <<endl;
   cout <<Out.str();
   cout.flush();
 

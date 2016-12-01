@@ -46,6 +46,7 @@ namespace Tasks {
       map<string,webloc*> Queue;
       bool                Is_Queuing;
       string              Current_Url;
+      bool                Need_To_Clear_Queue;
 
     //public constructors and methods
     public:
