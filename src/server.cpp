@@ -465,37 +465,6 @@ void server::queue_single_webloc(webloc* Webloc) {
 }
 
 /**
- * Autobalance the queues of crawlers, make these queues have rather
- * similar numbers of urls
- */
-void server::autobalance_queues() {
-  vector<webloc*> Weblocs;
-
-  //collect all weblocs from all queues
-  for (long Index=0; Index<server::CRAWLER_COUNT; Index++) {
-    crawler* Crawler = this->Crawlers[Index];
-
-    for (auto Iter: Crawler->Queue)
-      Weblocs.push_back(Iter.second);
-
-    Crawler->Queue.clear();
-  }
-
-  //round-robin distribute to queues in crawlers
-  long Crawler_Index = 0;
-  for (long Index=0; Index<(long)Weblocs.size(); Index++) {
-    webloc* Webloc = Weblocs[Index];
-
-    this->Crawlers[Crawler_Index]->Queue[Webloc->Id] = Webloc;
-
-    if (Crawler_Index==server::CRAWLER_COUNT-1)
-      Crawler_Index = 0;
-    else
-      Crawler_Index++;
-  }
-}
-
-/**
  * Run server
  */
 void server::run() {
