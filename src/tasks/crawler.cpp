@@ -218,9 +218,15 @@ void crawler::crawl_the_queue() {
 
     string Html;
     try {
+      string Path_And_Query;
+      if (Webloc->Query_String.length()>0)
+        Path_And_Query = Webloc->Path+"?"+Webloc->Query_String;
+      else
+        Path_And_Query = Webloc->Path;
+
       Html = utils::http_get(
         Webloc->Domain_Name+":"+to_string(Webloc->Port),
-        Webloc->Path+"?"+Webloc->Query_String
+        Path_And_Query
       );
       Out <<"Web page loaded OK" <<endl;
     }
