@@ -143,14 +143,43 @@ const tree<Node>::iterator& Parent) {
  */
 void crawler::add_more_link(vector<string>& More_Links,webloc* Webloc,
 string& Href) {
-  if (Href.substr(0,4)=="http") {
+
+  //http
+  if (Href.substr(0,7)=="http://") {
     More_Links.push_back(Href);
     return;
   }
 
-  string Link = Webloc->Protocol+"://"+Webloc->Domain_Name+":"+
-  to_string(Webloc->Port)+Href;
+  //https
+  if (Href.substr(0,8)=="https://") {
+    More_Links.push_back(Href);
+    return;
+  }
 
+  //url from root
+  if (Href[0]=='/') {
+    string Link = Webloc->Protocol+"://"+Webloc->Domain_Name+":"+
+    to_string(Webloc->Port)+Href;
+
+    More_Links.push_back(Link);
+    return;
+  }
+
+  //check whether path has trailing slash
+  string Slash_Or_No;
+  if (Webloc->Path.length()==0)
+    Slash_Or_No = "/";
+  else
+  if (Webloc->Path[Webloc->Path.length()-1]=='/')
+    Slash_Or_No = "";
+  else
+    Slash_Or_No = "/";
+
+  //make the link
+  string Link = Webloc->Protocol+"://"+Webloc->Domain_Name+":"+
+  to_string(Webloc->Port)+Webloc->Path+Slash_Or_No+Href;
+
+  //add to more links
   More_Links.push_back(Link);
 }
 
