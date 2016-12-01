@@ -408,11 +408,13 @@ long& Port,string& Path,string& Query_String) {
   State.uri = &Uri;
   if (uriParseUriA(&State,Full_Url.c_str())!=URI_SUCCESS) {
     uriFreeUriMembersA(&Uri);
+
     Protocol.clear();
     Domain_Name.clear();
     Port = 0;
     Path.clear();
     Query_String.clear();
+    
     return;
   }
 

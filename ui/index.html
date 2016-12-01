@@ -19,7 +19,10 @@
   </head>
 
   <body>
-    <div>Server Status: <span id="Server-Status"></span></div>
+    <div>
+      Server Status: <span id="Server-Status"></span>
+      GET /
+    </div>
     <hr/>
 
     <!--web location adding box-->
@@ -33,6 +36,7 @@
       onclick="this.value='';"/><br/>
 
       <button onclick="add_web_location();">Add This Web Location</button>
+      POST /webloc/add
     </div>
     <hr/>
 
@@ -57,13 +61,20 @@
       </table>
 
       <button onclick="get_crawlers_statuses()">Get Crawlers' Statuses</button>
+      POST /crawlers/statuses
     </div>
     <hr/>
 
     <!--test search-->
     <div>
-      Text to search: <input id="Search-Text"/><br/>
-      <button onclick="search_for_text();">Do searching!</button><br/>
+      Text to search: <input id="Search-Text" value="hbo"
+      onclick="this.value='';" onkeyup="check_enter_key(event);"/><br/>
+
+      <button onclick="search_for_text();">Do searching!</button>
+      POST /search<br/>
+
+      <div id="Search-Result-Box">
+      </div>
     </div>
   </body>
 </html>

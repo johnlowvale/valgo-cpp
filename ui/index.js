@@ -116,6 +116,99 @@ function get_crawlers_statuses() {
  * Search for text
  */
 function search_for_text() {
+  var Text = $("#Search-Text").val().trim();
+  if (Text.length==0) {
+    alert("Please type something to search!");
+    return;
+  }
+
+  $.post("http://localhost:8891/search",JSON.stringify({
+    Text: Text
+  })).
+  done(function(Data){
+    if (Data.Error) {
+      alert("Error: "+JSON.stringify(Data.Error));
+      return;
+    }
+
+    //build results html
+    var Contents = Data.Contents;
+    var Box      = $("#Search-Result-Box");
+    Box.html("");
+
+    if (Contents.length==0)
+      Box.html("No results");
+
+    //make results
+    for (var Index=0; Index<Contents.length; Index++) {
+      var Content = Contents[Index];
+      var Title   = Content.Title;
+      var Url     = Content.Url;
+      var Extract = Content.Extract;
+      var Html    = Content.Html;
+      var Hilight = "";
+
+      try {
+        Hilight = $(Html).text();
+      }
+      catch (Error) {
+        Hilight = Html;
+      }
+    
+      //words in search text
+      var Words  = [];
+      var Tokens = Text.split(" ");
+      for (var Jndex=0; Jndex<Tokens.length; Jndex++) 
+        if (Tokens[Jndex].length>0)
+          Words.push(Tokens[Jndex]);
+
+      //highlight words in results
+      for (var Jndex=0; Jndex<Words.length; Jndex++) {
+        var Word = Words[Jndex];
+        Hilight = Hilight.replace(
+          new RegExp(Word,"gi"),
+          "<b style='color:red;'>"+Word+"</b>"
+        );
+      }  
+
+      //shorten highlight text
+      var Shortened_Hilight = "";
+      for (var Jndex=0; Jndex<Words.length; Jndex++) {
+        var Word = Words[Jndex];
+
+        for (var Kndex=0; Kndex<Hilight.length; Kndex++)
+          if (Hilight[Kndex]=='<' && Hilight[Kndex+1]=='b')
+            Shortened_Hilight += "..."+Hilight.substr(Kndex-50,100)+"...";
+      }
+
+      //no title, extract
+      if (Title.length==0)
+        Title = Url;
+      if (Extract.length==0)
+        Extract = "(no extract)";
+
+      //html entry
+      var Result = "";
+      Result += "<div>";
+      Result += "<a target='_blank' href='"+Url+"'>"+Title+"</a><br/>";
+      Result += Extract+"<br/>";
+      Result += Shortened_Hilight;
+      Result += "</div>";
+
+      Box.html(Box.html()+Result);
+    }
+  }).
+  fail(function(Data){
+    alert("Error: "+JSON.stringify(Data));
+  });
+}
+
+/**
+ * Check enter key to do searching
+ */
+function check_enter_key(Event) {
+  if (Event.keyCode==13)
+    search_for_text();
 }
 
 /**

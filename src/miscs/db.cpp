@@ -179,8 +179,18 @@ const char* Index_Name,const char* Index_Info) {
  * Find documents in collection
  */
 cursor db::find(client& Db_Client,const char* Collection_Name,
-value& Value) {
-  return Db_Client[db::DB_NAME][Collection_Name].find(Value.view());
+value& Value,long Limit) {
+  if (Limit==0)
+    return Db_Client[db::DB_NAME][Collection_Name].find(Value.view());
+  else {
+    options::find Options;
+    Options.limit(Limit);
+
+    return Db_Client[db::DB_NAME][Collection_Name].find(
+      Value.view(),
+      Options
+    );
+  }//else
 }
 
 /**
