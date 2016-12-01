@@ -136,7 +136,8 @@ function get_crawlers_statuses() {
       Tr += "<tr>";
       Tr += "<td>"+Crawler.Index+"</td>";
       Tr += "<td>"+Crawler.Queue_Length+"</td>";
-      Tr += "<td>"+Crawler.Current_Url+"</td>";
+      Tr += "<td><a target='_blank' href='"+Crawler.Current_Url+"'>"+
+            Crawler.Current_Url+"</a></td>";
       Tr += "</tr>";
 
       Html += Tr;
