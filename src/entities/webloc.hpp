@@ -19,6 +19,7 @@
 #include <mongocxx/client.hpp>
 
 //in-project headers
+#include <consts.hpp>
 #include <types.hpp>
 
 //standard c++ namespaces being used
@@ -65,7 +66,7 @@ namespace Entities {
       ~webloc();
 
       //db operations
-      string save_to_db(client& Db_Client);
+      string save_to_db(client& Db_Client,int64 Crawl_At=ONE_HOUR_MILLI);
   };
 }//namespace path
 

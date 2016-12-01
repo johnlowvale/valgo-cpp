@@ -7,6 +7,7 @@
  */
 
 //standard c++ headers
+#include <climits>
 #include <iostream>
 #include <map>
 #include <stdio.h>
@@ -120,6 +121,46 @@ void server::handle_post_webloc_add(response Response,request Request) {
 }
 
 /**
+ * Handle /webloc/crawl URL
+ */
+void server::handle_post_webloc_crawl(response Response,request Request) {
+  utils::print_request(Request);
+
+  //get request data
+  ptree  Content      = utils::get_request_content_ptree(Request);
+  string Full_Url     = Content.get<string>("Full_Url");
+  float  Revisit_Time = Content.get<float>("Revisit_Time");
+
+  //log
+  cout <<"Full URL: " <<Full_Url <<endl;
+  cout <<"Revisit Time: " <<Revisit_Time <<" hour(s)" <<endl;
+  cout.flush();
+  
+  //add to db
+  webloc* Webloc = new webloc(Full_Url,Revisit_Time);
+  string Result = Webloc->save_to_db(server::Singleton->Db_Client,0);
+
+  //update Revisit_At
+  value Find_Val = document{}
+  <<"_id" <<Full_Url
+  <<finalize;
+
+  value Update_Val = document{}
+  <<"$set"
+  <<open_document
+    <<"Revisit_At" <<utils::now_as_bdate()
+  <<close_document
+  <<finalize;
+
+  db::update_one(server::Singleton->Db_Client,"weblocs",Find_Val,Update_Val);
+
+  //tell distributor thread to queue this webloc to certain crawler
+  server::Singleton->queue_single_webloc(Webloc);
+
+  utils::send_json(Response,JSON_MESSAGE_OK);
+}
+
+/**
  * Handle /crawlers/statuses URL
  */
 void server::handle_post_crawlers_statuses(response Response,request Request) {
@@ -137,7 +178,7 @@ void server::handle_post_crawlers_statuses(response Response,request Request) {
     ptree    Status;
 
     Status.put("Index",       Index);
-    Status.put("Queue_Length",Crawler->Queue.size()-Crawler->Current_Index);
+    Status.put("Queue_Length",Crawler->Queue.size());
     Status.put("Current_Url", Crawler->Current_Url);
 
     Statuses.push_back(make_pair("",Status));
@@ -243,6 +284,9 @@ void server::initialise() {
 
   this->Http_Server->resource["^/webloc/add$"]["POST"] = 
   server::handle_post_webloc_add;
+
+  this->Http_Server->resource["^/webloc/crawl$"]["POST"] = 
+  server::handle_post_webloc_crawl;
 
   this->Http_Server->resource["^/crawlers/statuses$"]["POST"] = 
   server::handle_post_crawlers_statuses;
@@ -399,6 +443,25 @@ void server::queue_weblocs() {
     //sleep for 1 hour
     this_thread::sleep_for(milliseconds(ONE_HOUR_MILLI));
   }
+}
+
+/**
+ * Queue a single webloc to a crawler
+ */
+void server::queue_single_webloc(webloc* Webloc) {
+  long     Min_Queue_Length = LONG_MAX;
+  crawler* Min_Crawler      = nullptr; 
+
+  //find crawler with fewest weblocs in queue
+  for (long Index=0; Index<server::CRAWLER_COUNT; Index++) {
+    if (this->Crawlers[Index]->Queue.size()<(unsigned long)Min_Queue_Length) {
+      Min_Queue_Length = this->Crawlers[Index]->Queue.size();
+      Min_Crawler      = this->Crawlers[Index];
+    }
+  }//for
+
+  //enqueue to the crawler with min queue length
+  Min_Crawler->Queue[Webloc->Id] = Webloc;
 }
 
 /**

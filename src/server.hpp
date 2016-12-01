@@ -63,6 +63,7 @@ class server {
     //url handlers
     static void handle_get_root(response Response,request Request);
     static void handle_post_webloc_add(response Response,request Request);
+    static void handle_post_webloc_crawl(response Response,request Request);
     static void handle_post_crawlers_statuses(
                 response Response,request Request);
     static void handle_post_search(response Response,request Request);
@@ -73,6 +74,7 @@ class server {
     void update_past_weblocs();
     bool is_not_queued(webloc* Webloc);
     void queue_weblocs();
+    void queue_single_webloc(webloc* Webloc);
     void run();
 };
 

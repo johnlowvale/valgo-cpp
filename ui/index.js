@@ -80,6 +80,43 @@ function add_web_location() {
 }
 
 /**
+ * Crawl a web location immediately
+ */
+function crawl_web_location() {
+  var Full_Url     = $("#Nwl-Url").val();
+  var Revisit_Time = $("#Nwl-Revisit-Time").val();
+
+  //check if url is valid
+  if (!is_valid_url(Full_Url)) {
+    alert("URL is invalid!");
+    return;
+  }
+
+  //check if revisit time is number
+  if (!$.isNumeric(Revisit_Time) || Revisit_Time<=0) {
+    alert("Revisit time must be positive number");
+    return;
+  }
+
+  //send to server
+  $.post("http://localhost:8891/webloc/crawl",JSON.stringify({
+    Full_Url:     Full_Url,
+    Revisit_Time: parseInt(Revisit_Time)
+  })).
+  done(function(Data){
+    if (Data.Error) {
+      alert("Error: "+JSON.stringify(Data.Error));
+      return;
+    }
+
+    alert("Web location queued!");
+  }).
+  fail(function(Data){
+    alert("Error: "+JSON.stringify(Data));
+  });
+}
+
+/**
  * Get crawlers' statuses
  */
 function get_crawlers_statuses() {

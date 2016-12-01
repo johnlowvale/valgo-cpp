@@ -177,15 +177,17 @@ void crawler::crawl_the_queue() {
   this->Current_Index = 0;
   for (webloc* Webloc: Weblocs) {
     this->Current_Url = 
-    Webloc->Domain_Name+":"+to_string(Webloc->Port)+Webloc->Path;
+    Webloc->Protocol+"://"+Webloc->Domain_Name+":"+to_string(Webloc->Port)+
+    Webloc->Path;
 
     //skip url if already in db
     value Count_Val = document{}
-    <<"_id" <<Webloc->Protocol+"://"+this->Current_Url
+    <<"_id" <<this->Current_Url
     <<finalize;
     int64 Url_Count = db::count(this->Db_Client,"weblocs",Count_Val,1);
 
     if (Url_Count==1) {
+      this->Queue.erase(this->Queue.find(Webloc->Full_Url));
       this->Current_Index++;
       continue;
     }
@@ -252,11 +254,12 @@ void crawler::crawl_the_queue() {
     Content.Links   = Links;
     Content.save_to_db(this->Db_Client); 
 
+    //remove from queue
+    this->Queue.erase(this->Queue.find(Webloc->Full_Url));
+
+    //index in the sorted vector
     this->Current_Index++;
   }
-
-  //clear previous queue
-  this->clear_queue();
 
   //add more links to the queue
   for (string Url: More_Links) {

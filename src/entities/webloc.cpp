@@ -75,13 +75,13 @@ webloc::~webloc() {
  * Save to db
  * @return "OK" if successful, a json string representing the error otherwise
  */
-string webloc::save_to_db(client& Db_Client) {
+string webloc::save_to_db(client& Db_Client,int64 Crawl_At) {
 
   //current time
   int64 Millisecond = utils::milliseconds_since_epoch();
 
   //let it be crawled in the next hour
-  Millisecond += ONE_HOUR_MILLI;
+  Millisecond += Crawl_At;
 
   //make the webloc document
   document Document;

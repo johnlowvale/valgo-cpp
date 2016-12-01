@@ -36,7 +36,10 @@
       onclick="this.value='';"/><br/>
 
       <button onclick="add_web_location();">Add This Web Location</button>
-      POST /webloc/add
+      POST /webloc/add<br/>
+
+      <button onclick="crawl_web_location();">Crawl this Web Location</button>
+      POST /webloc/crawl<br/>
     </div>
     <hr/>
 
@@ -70,9 +73,9 @@
       Text to search: <input id="Search-Text" value="hbo"
       onclick="this.value='';" onkeyup="check_enter_key(event);"/><br/>
 
-      <button onclick="search_for_text();">Do searching!</button>&nbsp;
-      <button onclick="clear_search_results();">Clear!</button>
+      <button onclick="search_for_text();">Do searching!</button>      
       POST /search<br/>
+      <button onclick="clear_search_results();">Clear!</button>
 
       <div id="Search-Result-Box">
       </div>
