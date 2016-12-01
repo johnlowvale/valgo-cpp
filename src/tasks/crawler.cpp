@@ -208,6 +208,8 @@ void crawler::crawl_the_queue() {
     this->Current_Url = Webloc->Full_Url;
 
     //skip url if already in db
+    //not supposed to skip, html contents to be updated based on Revisit_Time
+    /*
     value Count_Val = document{}
     <<"_id" <<this->Current_Url
     <<finalize;
@@ -218,6 +220,7 @@ void crawler::crawl_the_queue() {
       this->Current_Index++;
       continue;
     }
+    */
 
     //get web contents
     string Html = utils::http_get(
@@ -279,7 +282,7 @@ void crawler::crawl_the_queue() {
     Content.Extract = Extract;
     Content.Html    = Html;
     Content.Links   = Links;
-    Content.save_to_db(this->Db_Client); 
+    Content.save_to_db(this->Db_Client);
 
     //remove from queue
     this->Queue.erase(this->Queue.find(Webloc->Full_Url));
