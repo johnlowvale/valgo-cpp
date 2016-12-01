@@ -385,7 +385,6 @@ string utils::path_segments_to_str(UriPathSegmentA* Segment) {
   UriPathSegmentStructA* Head(Segment);
 
   while (Head) {
-    cout <<0; cout.flush();
     Accum += Delim+string(Head->text.first,Head->text.afterLast); 
     Head   = Head->next;
   }
@@ -414,7 +413,7 @@ long& Port,string& Path,string& Query_String) {
     Port = 0;
     Path.clear();
     Query_String.clear();
-    
+
     return;
   }
 
