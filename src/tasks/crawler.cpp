@@ -321,7 +321,7 @@ void crawler::run() {
     }
 
     //tell url distributor to redistribute
-    server::Singleton->autobalance_queues();
+    //server::Singleton->autobalance_queues();
 
     //bulk printing thru' stringstream
     stringstream Out;
