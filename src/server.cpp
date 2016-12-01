@@ -26,6 +26,7 @@
 #include <consts.hpp>
 #include <server.hpp>
 #include <types.hpp>
+#include <algos/searching/searcher.hpp>
 #include <entities/webloc.hpp>
 #include <miscs/db.hpp>
 #include <miscs/utils.hpp>
@@ -46,6 +47,7 @@ using bsoncxx::to_json;
 using bsoncxx::types::b_date;
 
 //in-project namespaces
+using namespace Algos::Searching;
 using namespace Entities;
 using namespace Miscs;
 using namespace Tasks;
@@ -228,48 +230,16 @@ response Response,request Request) {
  * Handle /search URL
  */
 void server::handle_post_search(response Response,request Request) {
-  utils::print_request(Request);
-
-  //get request data
-  ptree  Content = utils::get_request_content_ptree(Request);
-  string Text    = Content.get<string>("Text");
-  cout <<"\nSearching for " <<Text <<endl;
-
-  //value to find
-  value Find_Value = document{}
-  <<"$text"
-  <<open_document
-    <<"$search" <<Text
-  <<close_document
-  <<finalize;
-
-  //get result
-  cursor Cursor = db::find(
-    server::Singleton->Db_Client,"contents",Find_Value,10
+  searcher Searcher(
+    server::Singleton->Db_Client,Request,Response
   );
 
-  //get results from cursor
-  ptree Result;
-  ptree Contents;
-  long  Count = 0;
+  //start new thread
+  thread Searcher_Thread(&searcher::run,&Searcher);
+  Searcher_Thread.join();
 
-  for (view View: Cursor) {
-    ptree Content;
-    Content.put("Title",  db::get_string(View["Title"]));
-    Content.put("Url",    db::get_string(View["Url"]));
-    Content.put("Extract",db::get_string(View["Extract"]));
-    Content.put("Html",   db::get_string(View["Html"]));
-
-    Contents.push_back(make_pair("",Content));
-    Count++;
-  }
-
-  Result.add_child("Contents",Contents);
-  cout <<"Found " <<Count <<" result(s)" <<endl;
-
-  //respond
-  string Json_Str = utils::dump_to_json_str(Result);
-  utils::send_json(Response,Json_Str);
+  //not to detach here coz detaching the thread means running out of this
+  //method and the 2 variables Response, Request will be disposed.
 }
 
 /**

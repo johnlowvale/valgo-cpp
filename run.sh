@@ -183,6 +183,29 @@ cd ..
 echo "All entities files compiled."
 echo ""
 
+echo "Compiling algos files..."
+cd algos/searching
+#-------------------------------------------------------------------------------
+md5sum searcher.cpp >temp.md5
+if cmp -s temp.md5 searcher.md5
+then
+  echo "searcher.cpp (unchanged)"
+else
+  echo "searcher.cpp is being compiled..."
+  if g++-6 -std=c++14 -Wall -Wfatal-errors -c -o searcher.o searcher.cpp
+  then
+    md5sum searcher.cpp >searcher.md5
+    echo "(compiled)"
+  else
+    echo "(failed)"
+    exit
+  fi
+fi
+#-------------------------------------------------------------------------------
+cd ../..
+echo "All algos files compiled."
+echo ""
+
 echo "Compiling main code file..."
 #-------------------------------------------------------------------------------
 md5sum server.cpp >temp.md5
@@ -209,14 +232,16 @@ cp server.o ../build
 cp miscs/*.o ../build
 cp tasks/*.o ../build
 cp entities/*.o ../build
+cp algos/searching/*.o ../build
 echo "Copied."
 echo ""
 
 echo "Linking object files to executable..."
 cd ../build
 g++-6 -std=c++14 -Wall -Wfatal-errors -pthread -o server \
-server.o crawler.o utils.o db.o moment.o webloc.o content.o relation.o \
-node.o graph.o -lboost_system -lbsoncxx -lmongocxx -luriparser -lhtmlcxx
+server.o searcher.o crawler.o utils.o db.o moment.o webloc.o content.o \
+relation.o node.o graph.o \
+-lboost_system -lbsoncxx -lmongocxx -luriparser -lhtmlcxx
 echo "Linked."
 echo ""
 
