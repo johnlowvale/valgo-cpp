@@ -215,7 +215,9 @@ response Response,request Request) {
 
     Out <<"Clearing " <<Crawler->Queue.size() <<" URL(s) from crawler "
     <<Index <<endl;
-    Crawler->Need_To_Clear_Queue = true;
+
+    if (Crawler->Queue.size()>0)
+      Crawler->Need_To_Clear_Queue = true;
   }
 
   //log
