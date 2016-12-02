@@ -1,6 +1,21 @@
+/**
+ * vAlgo++ Smart Algorithm Service
+ * Copyright (c) Abivin JSC
+ * @file    Admin UI stylesheet file
+ * @version 0.1
+ * @author  Dat Dinhquoc
+ */
+
+body {
+  text-align:center; margin:0; padding:0; line-height:30px; overflow-y:scroll;
+}
 
 #Status-Table-Of-Crawlers td {
-  border:1px solid gray;
+  border:1px solid gray; background:white;
+}
+
+#Search-Result-Box {
+  margin-top:20px;
 }
 
 /*end of file*/

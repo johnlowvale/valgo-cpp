@@ -19,33 +19,41 @@
   </head>
 
   <body>
-    <div>
-      Server Status: <span id="Server-Status"></span>
-      GET /
+    <div style="width:960px; margin-left:auto; margin-right:auto;
+    background:skyblue; padding:20px;
+    text-align:left;">
+      <b>Server Status</b> (GET /): <span id="Server-Status"></span>      
     </div>
-    <hr/>
 
     <!--web location adding box-->
-    <div>
-      New Web Location (URL): 
-      <input id="Nwl-Url" value="http://example.com" 
-      onclick="this.value='';"/> -
+    <div style="width:100%; background:gray; text-align:center;
+    padding-top:20px; padding-bottom:20px;">
+      <div style="width:960px; margin-left:auto; margin-right:auto;
+      background:lightgray; padding:20px; text-align:left;">
+        <b>New Web Location (URL)</b>: 
+        <input id="Nwl-Url" value="http://example.com" onclick="this.value='';"
+        style="width:550px;"/> -
 
-      Revisit Time (Hours): 
-      <input id="Nwl-Revisit-Time" value="1"
-      onclick="this.value='';"/><br/>
+        Revisit Time (Hours): 
+        <input id="Nwl-Revisit-Time" value="1" onclick="this.value='';"
+        style="width:50px;"/><br/>
 
-      <button onclick="add_web_location();">Add This Web Location</button>
-      POST /webloc/add<br/>
+        <button onclick="add_web_location();" style="width:200px;">
+          Add This Web Location
+        </button>
+        (POST /webloc/add)<br/>
 
-      <button onclick="crawl_web_location();">Crawl this Web Location</button>
-      POST /webloc/crawl<br/>
+        <button onclick="crawl_web_location();" style="width:200px;">
+          Crawl this Web Location
+        </button>
+        (POST /webloc/crawl)<br/>
+      </div>
     </div>
-    <hr/>
 
     <!--crawler stats box-->
-    <div>
-      Statuses of Crawlers:<br/>
+    <div style="background:skyblue; width:960px; padding:20px; 
+    text-align:left; margin-left:auto; margin-right:auto;">
+      <b>Statuses of Crawlers</b>:<br/>
       <table id="Status-Table-Of-Crawlers">
         <thead>
           <tr>
@@ -63,24 +71,35 @@
         </tbody>
       </table>
 
-      <button onclick="get_crawlers_statuses()">Get Crawlers' Statuses</button>
-      POST /crawlers/statuses<br/>
+      <button onclick="get_crawlers_statuses()" style="width:200px;">
+        Get Crawlers' Statuses
+      </button>
+      (POST /crawlers/statuses)<br/>
 
-      <button onclick="clear_crawlers_queues();">Clear All Queues</button> 
-      POST /crawlers/queues/clear
+      <button onclick="clear_crawlers_queues();" style="width:200px;">
+        Clear All Queues
+      </button> 
+      (POST /crawlers/queues/clear)
     </div>
-    <hr/>
 
     <!--test search-->
-    <div>
-      Text to search: <input id="Search-Text" value="hbo"
-      onclick="this.value='';" onkeyup="check_enter_key(event);"/><br/>
+    <div style="margin-left:auto; margin-right:auto; width:960px;
+    padding:20px; background:lightgray; text-align:left;">
+      <b>Text to Search</b>: 
+      <input id="Search-Text" value="hbo" onclick="this.value='';" 
+      onkeyup="check_enter_key(event);" style="width:840px;"/><br/>
 
-      <button onclick="search_for_text();">Do searching!</button>      
-      POST /search<br/>
-      <button onclick="clear_search_results();">Clear!</button>
+      <button onclick="search_for_text();" style="width:200px;">
+        Do Searching!
+      </button>      
+      (POST /search)<br/>
+
+      <button onclick="clear_search_results();" style="width:200px;">
+        Clear!
+      </button>
 
       <div id="Search-Result-Box">
+        Type some text to search and get results here!
       </div>
     </div>
   </body>

@@ -245,7 +245,7 @@ function search_for_text() {
 
       //html entry
       var Result = "";
-      Result += "<div>";
+      Result += "<div style='margin-bottom:20px; line-height:20px;'>";
       Result += "<a target='_blank' href='"+Url+"'>"+Title+"</a><br/>";
       Result += Extract+"<br/>";
       Result += Shortened_Hilight;
@@ -263,7 +263,8 @@ function search_for_text() {
  * Clear search result
  */
 function clear_search_results() {
-  $("#Search-Result-Box").html("");
+  $("#Search-Result-Box").
+  html("Type some text to search and get results here!");
 }
 
 /**
@@ -288,7 +289,8 @@ $(function(){
     setInterval(get_crawlers_statuses,5*1000);
   }).
   fail(function(Data){
-    $("#Server-Status").html(JSON.stringify(Data));
+    //$("#Server-Status").html(JSON.stringify(Data));
+    $("#Server-Status").html("FAILED_TO_CONNECT_TO_VALGO_CPP");
   });
 });
 
