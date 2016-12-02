@@ -513,11 +513,19 @@ void server::run() {
   cout <<"\nServer listening at port " <<to_string(server::PORT) <<"...\n";
   this->Http_Server->start();
 
-  //free resource
+  //free resources
   for (long Index=0; Index<server::CRAWLER_COUNT; Index++) {
+
+    //weblocs
+    for (auto Iter: this->Crawlers[Index]->Queue) {
+      delete Iter.second;
+    }
+
+    //crawler
     delete this->Crawlers[Index];
   }
 
+  //http server
   delete this->Http_Server;
 }
 
