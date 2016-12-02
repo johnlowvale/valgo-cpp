@@ -56,6 +56,8 @@ class server {
     client           Db_Client_Reviver;
     client           Db_Client_Distributor;
     vector<crawler*> Crawlers;
+    long             Last_Revive_Count;
+    long             Last_Distribution_Count;
 
   //public constructor and methods
   public:

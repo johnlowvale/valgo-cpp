@@ -63,7 +63,11 @@ server* server::Singleton     = nullptr;
  */
 server::server() {
   server::Singleton = this;
-  this->Http_Server = new http_server(server::PORT,1);
+
+  //instantial properties
+  this->Http_Server             = new http_server(server::PORT,1);
+  this->Last_Revive_Count       = 0;
+  this->Last_Distribution_Count = 0;
 }
 
 /**
@@ -171,10 +175,8 @@ void server::handle_post_crawlers_statuses(response Response,request Request) {
   //get request data
   ptree Content = utils::get_request_content_ptree(Request);
 
-  //result
-  ptree Result;
+  //statuses of crawlers
   ptree Statuses;
-
   for (long Index=0; Index<server::CRAWLER_COUNT; Index++) {
     crawler* Crawler = server::Singleton->Crawlers[Index];
     ptree    Status;
@@ -186,7 +188,19 @@ void server::handle_post_crawlers_statuses(response Response,request Request) {
     Statuses.push_back(make_pair("",Status));
   }
 
-  Result.add_child("Crawlers",Statuses);
+  //reviver infos
+  ptree Reviver;
+  Reviver.put("Last_Count",server::Singleton->Last_Revive_Count);
+
+  //url distributor infos
+  ptree Distributor;
+  Distributor.put("Last_Count",server::Singleton->Last_Distribution_Count);
+
+  //result
+  ptree Result;  
+  Result.add_child("Crawlers",   Statuses);
+  Result.add_child("Reviver",    Reviver);
+  Result.add_child("Distributor",Distributor);
 
   //log
   string Json_Str = utils::dump_to_json_str(Result);
@@ -361,6 +375,7 @@ void server::update_past_weblocs() {
     }
 
     //log
+    this->Last_Revive_Count = Update_Count;
     cout <<"\nUpdated schedules for " <<Update_Count <<" URL(s)" <<endl;
 
     //sleep for a minute
@@ -450,6 +465,7 @@ void server::queue_weblocs() {
     }
 
     //log
+    this->Last_Distribution_Count = Webloc_Count;
     Out <<"Queued " <<Webloc_Count <<" web location(s)" <<endl;
     cout <<Out.str();
     cout.flush();

@@ -143,6 +143,8 @@ function get_crawlers_statuses() {
       Html += Tr;
     }
 
+    $("#Last-Revive-Count").html(Data.Reviver.Last_Count);
+    $("#Last-Dist-Count").html(Data.Distributor.Last_Count);
     $("#Crawler-Statuses").html(Html);
   }).
   fail(function(Data){
