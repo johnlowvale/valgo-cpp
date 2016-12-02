@@ -53,6 +53,8 @@ class server {
   public:
     http_server*     Http_Server;
     client           Db_Client;
+    client           Db_Client_Reviver;
+    client           Db_Client_Distributor;
     vector<crawler*> Crawlers;
 
   //public constructor and methods

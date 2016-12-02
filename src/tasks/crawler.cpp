@@ -79,7 +79,11 @@ crawler::crawler(long Thread_Index) {
  */
 void crawler::clear_queue() {
   for (auto& Iterator: this->Queue) {
-    delete Iterator.second;
+    try {
+      delete Iterator.second;
+    }
+    catch (...) {
+    } 
   }
 
   this->Queue.clear();
@@ -294,8 +298,10 @@ void crawler::crawl_the_queue() {
 
     //remove from queue
     auto Iter = this->Queue.find(Webloc->Full_Url);
-    if (Iter!=this->Queue.end())
+    if (Iter!=this->Queue.end()) {
+      delete Webloc;
       this->Queue.erase(Iter);
+    }
 
     //check clear queue flag
     if (this->Need_To_Clear_Queue) {

@@ -273,7 +273,9 @@ void server::initialise() {
   cout <<"Copyright (c) Abivin JSC\n";
 
   //create db connection
-  this->Db_Client = db::get_client();
+  this->Db_Client             = db::get_client();
+  this->Db_Client_Reviver     = db::get_client();
+  this->Db_Client_Distributor = db::get_client();
 
   //create indices
   this->create_indices();
@@ -305,53 +307,64 @@ void server::initialise() {
  * must always be a time in the future.
  */
 void server::update_past_weblocs() {
+  while (true) {
 
-  //find weblocs with Revisit_At of time value in the past
-  value Value = document{} 
-  <<"Revisit_At"
-  <<open_document
-    <<"$lte" <<utils::now_as_bdate()
-  <<close_document
-  <<finalize;
-
-  //do finding
-  cursor Cursor = db::find(this->Db_Client,"weblocs",Value);
-
-  //update Revisit_At to make it a time in future
-  long Update_Count = 0;
-  for (view View: Cursor) {
-    //int64 Revisit_At = View["Revisit_At"].get_date().to_int64();
-
-    //schedule the webloc to be visited next minute
-    int64 Revisit_At = utils::milliseconds_since_epoch()+60*1000;
-
-    //update the webloc
-    value Find_Value = document{}
-    <<"_id" <<View["_id"].get_utf8().value.to_string()
-    <<finalize;
-
-    value Update_Value = document{}
-    <<"$set"
+    //find weblocs with Revisit_At of time value in the past
+    value Value = document{} 
+    <<"Revisit_At"
     <<open_document
-      <<"Revisit_At" <<b_date(milliseconds(Revisit_At))
+      <<"$lte" <<utils::now_as_bdate()
     <<close_document
     <<finalize;
 
-    try {
-      db::update_one(this->Db_Client,"weblocs",Find_Value,Update_Value);
-      Update_Count++;
-      //cout <<"Updated visit schedule for ";
-      //cout <<View["_id"].get_utf8().value.to_string() <<endl;
-    }
-    catch (operation_exception& Exception) {
-      cout <<"Update visit schedule failed for ";
-      cout <<View["_id"].get_utf8().value.to_string() <<endl;
-      cout <<to_json(Exception.raw_server_error().value()) <<endl;
-    }
-  }
+    //do finding
+    cursor Cursor = db::find(
+      this->Db_Client_Reviver,"weblocs",Value,REVIVES_PER_MINUTE
+    );
 
-  cout <<"Updated schedules for " <<Update_Count <<" URL(s)" <<endl;
-}
+    //update Revisit_At to make it a time in future
+    long Update_Count = 0;
+    for (view View: Cursor) {
+      //int64 Revisit_At = View["Revisit_At"].get_date().to_int64();
+
+      //schedule the webloc to be visited next minute
+      int64 Revisit_At = utils::milliseconds_since_epoch()+60*1000;
+
+      //update the webloc
+      value Find_Value = document{}
+      <<"_id" <<View["_id"].get_utf8().value.to_string()
+      <<finalize;
+
+      value Update_Value = document{}
+      <<"$set"
+      <<open_document
+        <<"Revisit_At" <<b_date(milliseconds(Revisit_At))
+      <<close_document
+      <<finalize;
+
+      try {
+        db::update_one(
+          this->Db_Client_Reviver,"weblocs",Find_Value,Update_Value
+        );
+
+        Update_Count++;
+        //cout <<"Updated visit schedule for ";
+        //cout <<View["_id"].get_utf8().value.to_string() <<endl;
+      }
+      catch (operation_exception& Exception) {
+        cout <<"\nUpdate visit schedule failed for ";
+        cout <<View["_id"].get_utf8().value.to_string() <<endl;
+        cout <<to_json(Exception.raw_server_error().value()) <<endl;
+      }
+    }
+
+    //log
+    cout <<"\nUpdated schedules for " <<Update_Count <<" URL(s)" <<endl;
+
+    //sleep for a minute
+    this_thread::sleep_for(milliseconds(ONE_HOUR_MILLI/60));
+  }//while
+}//update_past_weblocs
 
 /**
  * Check if a webloc is not yet queued in any crawler thread
@@ -406,7 +419,7 @@ void server::queue_weblocs() {
     <<finalize;
 
     //get the result cursor
-    cursor Cursor = db::find(this->Db_Client,"weblocs",Find_Value);
+    cursor Cursor = db::find(this->Db_Client_Distributor,"weblocs",Find_Value);
 
     //loop thru' documents found
     long Webloc_Count  = 0;
@@ -471,7 +484,10 @@ void server::queue_single_webloc(webloc* Webloc) {
  * Run server
  */
 void server::run() {
-  this->update_past_weblocs();
+
+  //thread for reviving webloc with Revisit_At of time in the past
+  thread Webloc_Revive_Thread(&server::update_past_weblocs,this);
+  Webloc_Revive_Thread.detach();
 
   //crawler threads
   for (long Index=0; Index<server::CRAWLER_COUNT; Index++) {

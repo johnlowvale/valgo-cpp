@@ -23,8 +23,9 @@
 #define DB_NAME__       "valgo"
 
 //number constants
-#define ONE_HOUR_MILLI (60*60*1000)
-#define EXTRACT_LENGTH 100
+#define ONE_HOUR_MILLI     (60*60*1000)
+#define EXTRACT_LENGTH     100
+#define REVIVES_PER_MINUTE 10000 //number of weblocs to revive per minute
 
 //string constants
 #define OK                     string("OK")
