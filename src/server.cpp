@@ -211,7 +211,7 @@ void server::handle_post_crawlers_statuses(response Response,request Request) {
 }
 
 /**
- * Handle /crawlers/queues/clear URL
+ * Handle /crawlers/queues/clear URLs
  */
 void server::handle_post_crawlers_queues_clear(
 response Response,request Request) {
