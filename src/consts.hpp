@@ -7,6 +7,7 @@
  *
  * Version info:
  * 0.1 Preliminary code 
+ * 1.0 Beta server with crawlers and simple search feature
  */
 
 //include guard begin
@@ -16,7 +17,7 @@
 //server constants
 //todo: fix g++ error 'expected unqualified-id' when these constants
 //have the same names with static properties in server.hpp/server.cpp
-#define VERSION__       "0.1"
+#define VERSION__       "1.0"
 #define PORT__          8891
 #define CRAWLER_COUNT__ 2
 #define DB_SERVER__     "mongodb://localhost:27017"
