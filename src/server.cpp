@@ -512,6 +512,13 @@ void server::run() {
   //start web server
   cout <<"\nServer listening at port " <<to_string(server::PORT) <<"...\n";
   this->Http_Server->start();
+
+  //free resource
+  for (long Index=0; Index<server::CRAWLER_COUNT; Index++) {
+    delete this->Crawlers[Index];
+  }
+
+  delete this->Http_Server;
 }
 
 /**
