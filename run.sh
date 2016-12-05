@@ -259,7 +259,7 @@ cd ../build
 g++-6 -std=c++14 -Wall -Wfatal-errors -pthread -o server \
 server.o searcher.o tipper.o crawler.o utils.o db.o moment.o webloc.o \
 content.o relation.o node.o graph.o \
--lboost_system -lbsoncxx -lmongocxx -luriparser -lhtmlcxx
+-lboost_system -lboost_regex -lbsoncxx -lmongocxx -luriparser -lhtmlcxx
 echo "Linked."
 echo ""
 

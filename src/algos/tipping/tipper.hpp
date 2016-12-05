@@ -28,11 +28,15 @@ namespace Tipping {
    */
   class tipper {
 
-    //public properties
+    //public reference properties
     public:
       client&   Db_Client;
       request&  Request;
       response& Response;
+
+    //public properties
+    public:
+      long Tip_Count;
 
     //public constructor, destructor and methods
     public:
@@ -40,7 +44,8 @@ namespace Tipping {
       ~tipper();
 
       //thread method
-      vector<string> get_facts_from(string Term,string Html);
+      vector<string> get_facts_from_text(string Term,string Text);
+      vector<string> get_facts_from_html(string Term,string Html);
       void           run();
   };
 

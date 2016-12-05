@@ -278,6 +278,7 @@ function get_tips_for_text() {
     Text: Text
   })).
   done(function(Data){
+    console.log(Data);
     if (Data.Error) {
       alert("Error: "+JSON.stringify(Data.Error));
       return;
@@ -292,20 +293,19 @@ function get_tips_for_text() {
       Box.html("No results");
 
     //make results
-    for (var Index=0; Index<Tips.length; Index++) {
-      var Tip  = Tips[Index];
-      var Url  = Tip.Url;
-      var Fact = Tip.Fact;
+    var Index = Math.floor(Tips.length*Math.random());
+    var Tip   = Tips[Index];
+    var Url   = Tip.Url;
+    var Fact  = Tip.Fact;
 
-      //html entry
-      var Result = "";
-      Result += "<div style='margin-bottom:20px; line-height:20px;'>";
-      Result += "<a target='_blank' href='"+Url+"'>"+Url+"</a><br/>";
-      Result += Fact;
-      Result += "</div>";
+    //html entry
+    var Result = "";
+    Result += "<div style='margin-bottom:20px; line-height:20px;'>";
+    Result += "<a target='_blank' href='"+Url+"'>"+Url+"</a><br/>";
+    Result += Fact;
+    Result += "</div>";
 
-      Box.html(Box.html()+Result);
-    }
+    Box.html(Box.html()+Result);
   }).
   fail(function(Data){
     alert("Error: "+JSON.stringify(Data));

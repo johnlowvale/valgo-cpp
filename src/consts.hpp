@@ -27,6 +27,7 @@
 #define ONE_HOUR_MILLI     (60*60*1000)
 #define EXTRACT_LENGTH     100
 #define REVIVES_PER_MINUTE 10000 //number of weblocs to revive per minute
+#define TIP_MAX            1000
 
 //string constants
 #define OK                     string("OK")

@@ -7,13 +7,17 @@
  */
 
 //standard c++ headers
+#include <algorithm>
 #include <cstdint>
 #include <iostream>
 #include <vector>
 
 //libary headers
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/regex.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <bsoncxx/json.hpp>
+#include <htmlcxx/html/ParserDom.h>
 #include <mongocxx/client.hpp>
 #include <mongocxx/cursor.hpp>
 #include <mongocxx/stdx.hpp>
@@ -31,6 +35,8 @@ using namespace boost;
 using namespace boost::property_tree;
 using namespace bsoncxx::builder::stream;
 using namespace bsoncxx::document;
+using namespace htmlcxx;
+using namespace htmlcxx::HTML;
 using namespace mongocxx;
 using namespace mongocxx::result;
 
@@ -46,7 +52,7 @@ using namespace Miscs;
  */
 tipper::tipper(client& Db_Client_,request& Request_,response& Response_):
 Db_Client(Db_Client_),Request(Request_),Response(Response_) {
-  //
+  this->Tip_Count = 0;
 }
 
 /**
@@ -56,12 +62,78 @@ tipper::~tipper() {
 }
 
 /**
+ * Get a list of facts from text 
+ */
+vector<string> tipper::get_facts_from_text(string Term,string Text) {
+  vector<string> Facts;
+
+  //enough tips
+  if (this->Tip_Count>=TIP_MAX)
+    return Facts;
+
+  //remove doublequotes
+  replace_all(Term,"\""," ");
+  trim(Term);
+
+  //find occurrences of Term
+  long Pos;
+  while ((Pos=Text.find(Term))!=-1) {
+    long Left_Pos  = Pos; //first char of Term in Text
+    long Right_Pos = Pos+Term.length()-1; //last char of Term in Text
+
+    //find sentence separator at left side
+    while (Left_Pos>=0 && Text[Left_Pos]!='.' && Text[Left_Pos]!='?')
+      Left_Pos--;
+
+    //find sentence separator at right side
+    while (Right_Pos<=(long)Text.length()-1 && Text[Right_Pos]!='.' &&
+    Text[Right_Pos]!='?')
+      Right_Pos++;
+
+    //extract the sentence found
+    string Sentence = Text.substr(Left_Pos+1,Right_Pos-Left_Pos-1);
+    trim(Sentence);
+
+    //add to fact list
+    Facts.push_back(Sentence);
+    this->Tip_Count++;
+
+    //remove the text before and including Right_Pos from Text
+    Text = Text.substr(Right_Pos);  
+  }
+
+  return Facts;
+}
+
+/**
  * Get a list of facts from html
  */
-vector<string> tipper::get_facts_from(string Term,string Html) {
-  vector<string> V;
-  V.push_back("abc");
-  return V;
+vector<string> tipper::get_facts_from_html(string Term,string Html) {
+  vector<string> Facts;
+
+  //parse html
+  ParserDom  Parser;
+  tree<Node> Dom = Parser.parseTree(Html);
+
+  //find all text nodes
+  for (auto Iter=Dom.begin(); Iter!=Dom.end(); Iter++) {
+    if (Iter->isTag() || Iter->isComment())
+      continue;
+
+    //get facts from text
+    string         Text          = Iter->text();
+    vector<string> Partial_Facts = this->get_facts_from_text(Term,Text);
+
+    //add facts to list
+    for (string Fact: Partial_Facts)
+      Facts.push_back(Fact);
+
+    //enough tips
+    if (this->Tip_Count>=TIP_MAX)
+      return Facts;
+  }
+
+  return Facts;
 }
 
 /**
@@ -97,7 +169,7 @@ void tipper::run() {
   for (view View: Cursor) {
     ptree          Tip;
     string         Url   = db::get_string(View["Url"]);
-    vector<string> Facts = this->get_facts_from(
+    vector<string> Facts = this->get_facts_from_html(
       Text,db::get_string(View["Html"])
     );
 
@@ -109,10 +181,16 @@ void tipper::run() {
 
     //url count
     Count++;
+
+    //enough tips
+    if (this->Tip_Count>=TIP_MAX)
+      break;
   }
 
   Result.add_child("Tips",Tips);
-  cout <<"Found " <<Count <<" related URL(s)" <<endl;
+  cout <<"Tip limit: " <<TIP_MAX <<endl;
+  cout <<"Parsed " <<Count <<" related URL(s)" <<endl;
+  cout <<"Found " <<this->Tip_Count <<" tips" <<endl;
 
   //respond
   string Json_Str = utils::dump_to_json_str(Result);
