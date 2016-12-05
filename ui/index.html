@@ -23,7 +23,18 @@
     <div style="width:960px; margin-left:auto; margin-right:auto;
     background:skyblue; padding:20px;
     text-align:left;">
-      <b>Server Status</b> (GET /): <span id="Server-Status"></span>      
+      <b>Server Address</b>: 
+      <input id="Server-Address" onclick="this.value='';"
+      value="http://localhost:8891" style="width:300px;"/>
+
+      <button onclick="use_loopback_addr();">Loopback</button>
+      <button onclick="use_lan_addr();">LAN</button>
+      <button onclick="use_live_addr();">Live</button><br/>
+
+      <button onclick="get_server_status();" style="width:200px;">
+        Get Server Status
+      </button>
+      (GET /) <span id="Server-Status"></span>
     </div>
 
     <!--web location adding box-->
@@ -105,6 +116,7 @@
       <button onclick="clear_search_results();" style="width:200px;">
         Clear!
       </button>
+      (Clear the results below)
 
       <div id="Search-Result-Box">
         Type some text to search and get results here!

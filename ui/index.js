@@ -43,6 +43,61 @@ function is_valid_url(Url) {
 }
 
 /**
+ * Get LAN ip
+ * http://stackoverflow.com/questions/20194722/
+ * can-you-get-a-users-local-lan-ip-address-via-javascript
+ */
+function get_lan_ip(Callback) {
+
+  //compatibility for firefox and chrome
+  window.RTCPeerConnection = window.RTCPeerConnection || 
+  window.mozRTCPeerConnection || window.webkitRTCPeerConnection;   
+
+  var pc   = new RTCPeerConnection({iceServers:[]}), 
+      noop = function(){};      
+
+  //create a bogus data channel
+  pc.createDataChannel(""); 
+
+  //create offer and set local description
+  pc.createOffer(pc.setLocalDescription.bind(pc),noop); 
+
+  pc.onicecandidate = function(ice){ //listen for candidate events
+    if (!ice || !ice.candidate || !ice.candidate.candidate)  
+      return;
+
+    var myIP= /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/.
+    exec(ice.candidate.candidate)[1];
+
+    Callback(myIP);   
+    pc.onicecandidate = noop;
+  };
+}
+
+/**
+ * Use loopback server address
+ */
+function use_loopback_addr() {
+  $("#Server-Address").val("http://localhost:8891");
+}
+
+/**
+ * Use LAN server address
+ */
+function use_lan_addr() {
+  get_lan_ip(function(Lan_Ip){
+    $("#Server-Address").val("http://"+Lan_Ip+":8891");
+  });
+}
+
+/**
+ * Use live server address
+ */
+function use_live_addr() {
+  $("#Server-Address").val("http://valgo1.abivin.vn:8891");
+}
+
+/**
  * Add new web location
  */
 function add_web_location() {
@@ -62,7 +117,9 @@ function add_web_location() {
   }
 
   //send to server
-  $.post("http://localhost:8891/webloc/add",JSON.stringify({
+  var Server_Addr = $("#Server-Address").val().trim();
+
+  $.post(Server_Addr+"/webloc/add",JSON.stringify({
     Full_Url:     Full_Url,
     Revisit_Time: parseInt(Revisit_Time)
   })).
@@ -99,7 +156,9 @@ function crawl_web_location() {
   }
 
   //send to server
-  $.post("http://localhost:8891/webloc/crawl",JSON.stringify({
+  var Server_Addr = $("#Server-Address").val().trim();
+
+  $.post(Server_Addr+"/webloc/crawl",JSON.stringify({
     Full_Url:     Full_Url,
     Revisit_Time: parseInt(Revisit_Time)
   })).
@@ -120,7 +179,9 @@ function crawl_web_location() {
  * Get crawlers' statuses
  */
 function get_crawlers_statuses() {
-  $.post("http://localhost:8891/crawlers/statuses",JSON.stringify({})).
+  var Server_Addr = $("#Server-Address").val().trim();
+
+  $.post(Server_Addr+"/crawlers/statuses",JSON.stringify({})).
   done(function(Data){
     if (Data.Error) {
       alert("Error: "+JSON.stringify(Data.Error));
@@ -156,7 +217,9 @@ function get_crawlers_statuses() {
  * Clear crawlers' queues
  */
 function clear_crawlers_queues() {
-  $.post("http://localhost:8891/crawlers/queues/clear",JSON.stringify({})).
+  var Server_Addr = $("#Server-Address").val().trim();
+
+  $.post(Server_Addr+"/crawlers/queues/clear",JSON.stringify({})).
   done(function(Data){
     if (Data.Error) {
       alert("Error: "+JSON.stringify(Data.Error));
@@ -180,7 +243,11 @@ function search_for_text() {
     return;
   }
 
-  $.post("http://localhost:8891/search",JSON.stringify({
+  //server address
+  var Server_Addr = $("#Server-Address").val().trim();
+
+  //post to server
+  $.post(Server_Addr+"/search",JSON.stringify({
     Text: Text
   })).
   done(function(Data){
@@ -274,7 +341,11 @@ function get_tips_for_text() {
     return;
   }
 
-  $.post("http://localhost:8891/tip",JSON.stringify({
+  //server address
+  var Server_Addr = $("#Server-Address").val().trim();
+
+  //post to server
+  $.post(Server_Addr+"/tip",JSON.stringify({
     Text: Text
   })).
   done(function(Data){
@@ -329,22 +400,34 @@ function check_enter_key(Event) {
 }
 
 /**
- * Entry point of web application
+ * Get server status
  */
-$(function(){
+function get_server_status() {
+  var Server_Addr = $("#Server-Address").val().trim();
 
   //get server status
-  $.get("http://localhost:8891").
+  $.get(Server_Addr).
   done(function(Data){
     $("#Server-Status").html(Data);
 
     //get crawlers' statuses after every 5s
-    setInterval(get_crawlers_statuses,5*1000);
+    if (window.crawlerStatusIntervalSet==null || 
+    window.crawlerStatusIntervalSet==false) {
+      setInterval(get_crawlers_statuses,5*1000);
+      window.crawlerStatusIntervalSet = true;
+    }
   }).
   fail(function(Data){
     //$("#Server-Status").html(JSON.stringify(Data));
     $("#Server-Status").html("FAILED_TO_CONNECT_TO_VALGO_CPP");
   });
+}
+
+/**
+ * Entry point of web application
+ */
+$(function(){
+  //
 });
 
 //end of file
