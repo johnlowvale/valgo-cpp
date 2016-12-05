@@ -89,13 +89,18 @@
     <div style="margin-left:auto; margin-right:auto; width:960px;
     padding:20px; background:lightgray; text-align:left;">
       <b>Text to Search</b>: 
-      <input id="Search-Text" value="hbo" onclick="this.value='';" 
+      <input id="Search-Text" value="A. O. Smith" onclick="this.value='';" 
       onkeyup="check_enter_key(event);" style="width:840px;"/><br/>
 
       <button onclick="search_for_text();" style="width:200px;">
         Do Searching!
       </button>      
       (POST /search)<br/>
+
+      <button onclick="tip_for_text();" style="width:200px;">
+        Get Tip!
+      </button>      
+      (POST /tip)<br/>
 
       <button onclick="clear_search_results();" style="width:200px;">
         Clear!

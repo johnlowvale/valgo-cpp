@@ -238,6 +238,7 @@ function search_for_text() {
           if (Hilight[Kndex]=='<' && Hilight[Kndex+1]=='b')
             Shortened_Hilight += "..."+Hilight.substr(Kndex-50,100)+"...";
       }
+      Shortened_Hilight = Shortened_Hilight.substr(0,1000);
 
       //no title, extract
       if (Title.length==0)
