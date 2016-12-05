@@ -349,7 +349,6 @@ function get_tips_for_text() {
     Text: Text
   })).
   done(function(Data){
-    console.log(Data);
     if (Data.Error) {
       alert("Error: "+JSON.stringify(Data.Error));
       return;
