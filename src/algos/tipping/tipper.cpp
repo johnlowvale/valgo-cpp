@@ -95,7 +95,7 @@ vector<string> tipper::get_facts_from_text(string Term,string Text) {
     trim(Sentence);
 
     //add to fact list
-    Facts.push_back(Sentence);
+    Facts.push_back(Sentence+"...");
     this->Tip_Count++;
 
     //remove the text before and including Right_Pos from Text
