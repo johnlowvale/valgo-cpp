@@ -184,8 +184,8 @@ echo "All entities files compiled."
 echo ""
 
 echo "Compiling algos files..."
-cd algos/searching
 #-------------------------------------------------------------------------------
+cd algos/searching
 md5sum searcher.cpp >temp.md5
 if cmp -s temp.md5 searcher.md5
 then
@@ -201,7 +201,24 @@ else
     exit
   fi
 fi
+cd ../..
 #-------------------------------------------------------------------------------
+cd algos/tipping
+md5sum tipper.cpp >temp.md5
+if cmp -s temp.md5 tipper.md5
+then
+  echo "tipper.cpp (unchanged)"
+else
+  echo "tipper.cpp is being compiled..."
+  if g++-6 -std=c++14 -Wall -Wfatal-errors -c -o tipper.o tipper.cpp
+  then
+    md5sum tipper.cpp >tipper.md5
+    echo "(compiled)"
+  else
+    echo "(failed)"
+    exit
+  fi
+fi
 cd ../..
 echo "All algos files compiled."
 echo ""
@@ -233,14 +250,15 @@ cp miscs/*.o ../build
 cp tasks/*.o ../build
 cp entities/*.o ../build
 cp algos/searching/*.o ../build
+cp algos/tipping/*.o ../build
 echo "Copied."
 echo ""
 
 echo "Linking object files to executable..."
 cd ../build
 g++-6 -std=c++14 -Wall -Wfatal-errors -pthread -o server \
-server.o searcher.o crawler.o utils.o db.o moment.o webloc.o content.o \
-relation.o node.o graph.o \
+server.o searcher.o tipper.o crawler.o utils.o db.o moment.o webloc.o \
+content.o relation.o node.o graph.o \
 -lboost_system -lbsoncxx -lmongocxx -luriparser -lhtmlcxx
 echo "Linked."
 echo ""

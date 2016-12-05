@@ -27,6 +27,7 @@
 #include <server.hpp>
 #include <types.hpp>
 #include <algos/searching/searcher.hpp>
+#include <algos/tipping/tipper.hpp>
 #include <entities/webloc.hpp>
 #include <miscs/db.hpp>
 #include <miscs/utils.hpp>
@@ -48,6 +49,7 @@ using bsoncxx::types::b_date;
 
 //in-project namespaces
 using namespace Algos::Searching;
+using namespace Algos::Tipping;
 using namespace Entities;
 using namespace Miscs;
 using namespace Tasks;
@@ -259,6 +261,22 @@ void server::handle_post_search(response Response,request Request) {
 }
 
 /**
+ * Handle /tip URL
+ */
+void server::handle_post_tip(response Response,request Request) {
+  tipper Tipper(
+    server::Singleton->Db_Client,Request,Response
+  );
+
+  //start new thread
+  thread Tipper_Thread(&tipper::run,&Tipper);
+  Tipper_Thread.join();
+
+  //not to detach here coz detaching the thread means running out of this
+  //method and the 2 variables Response, Request will be disposed.
+}
+
+/**
  * Create indices in db
  */
 void server::create_indices() {
@@ -314,6 +332,9 @@ void server::initialise() {
 
   this->Http_Server->resource["^/search$"]["POST"] = 
   server::handle_post_search;
+
+  this->Http_Server->resource["^/tip$"]["POST"] = 
+  server::handle_post_tip;
 }
 
 /**

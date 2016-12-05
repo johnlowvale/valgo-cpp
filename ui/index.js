@@ -263,6 +263,56 @@ function search_for_text() {
 }
 
 /**
+ * Get tips related to text
+ */
+function get_tips_for_text() {
+  var Text = $("#Search-Text").val().trim();
+
+  //check input
+  if (Text.length==0) {
+    alert("Please enter some text to get tip");
+    return;
+  }
+
+  $.post("http://localhost:8891/tip",JSON.stringify({
+    Text: Text
+  })).
+  done(function(Data){
+    if (Data.Error) {
+      alert("Error: "+JSON.stringify(Data.Error));
+      return;
+    }
+
+    //build results html
+    var Tips = Data.Tips;
+    var Box  = $("#Search-Result-Box");
+    Box.html("");
+
+    if (Tips.length==0)
+      Box.html("No results");
+
+    //make results
+    for (var Index=0; Index<Tips.length; Index++) {
+      var Tip  = Tips[Index];
+      var Url  = Tip.Url;
+      var Fact = Tip.Fact;
+
+      //html entry
+      var Result = "";
+      Result += "<div style='margin-bottom:20px; line-height:20px;'>";
+      Result += "<a target='_blank' href='"+Url+"'>"+Url+"</a><br/>";
+      Result += Fact;
+      Result += "</div>";
+
+      Box.html(Box.html()+Result);
+    }
+  }).
+  fail(function(Data){
+    alert("Error: "+JSON.stringify(Data));
+  });
+}
+
+/**
  * Clear search result
  */
 function clear_search_results() {
