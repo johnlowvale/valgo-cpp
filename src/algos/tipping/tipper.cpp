@@ -82,12 +82,13 @@ vector<string> tipper::get_facts_from_text(string Term,string Text) {
     long Right_Pos = Pos+Term.length()-1; //last char of Term in Text
 
     //find sentence separator at left side
-    while (Left_Pos>=0 && Text[Left_Pos]!='.' && Text[Left_Pos]!='?')
+    while (Left_Pos>=0 && Text[Left_Pos]!='.' && Text[Left_Pos]!='?' && 
+    Text[Left_Pos]!='!')
       Left_Pos--;
 
     //find sentence separator at right side
     while (Right_Pos<=(long)Text.length()-1 && Text[Right_Pos]!='.' &&
-    Text[Right_Pos]!='?')
+    Text[Right_Pos]!='?' && Text[Left_Pos]!='!')
       Right_Pos++;
 
     //extract the sentence found
