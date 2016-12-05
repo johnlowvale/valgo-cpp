@@ -56,6 +56,15 @@ tipper::~tipper() {
 }
 
 /**
+ * Get a list of facts from html
+ */
+vector<string> tipper::get_facts_from(string Term,string Html) {
+  vector<string> V;
+  V.push_back("abc");
+  return V;
+}
+
+/**
  * Tipper thread
  */
 void tipper::run() {
@@ -84,17 +93,26 @@ void tipper::run() {
   ptree Tips;
   long  Count = 0;
 
+  //loop thru' docs found in db
   for (view View: Cursor) {
-    ptree Tip;
-    Tip.put("Url", db::get_string(View["Url"]));
-    Tip.put("Fact","FACT");
+    ptree          Tip;
+    string         Url   = db::get_string(View["Url"]);
+    vector<string> Facts = this->get_facts_from(
+      Text,db::get_string(View["Html"])
+    );
 
-    Tips.push_back(make_pair("",Tip));
+    for (string Fact: Facts) {
+      Tip.put("Url", Url);
+      Tip.put("Fact",Fact);
+      Tips.push_back(make_pair("",Tip));
+    }
+
+    //url count
     Count++;
   }
 
   Result.add_child("Tips",Tips);
-  cout <<"Found " <<Count <<" result(s)" <<endl;
+  cout <<"Found " <<Count <<" related URL(s)" <<endl;
 
   //respond
   string Json_Str = utils::dump_to_json_str(Result);

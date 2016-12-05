@@ -40,7 +40,8 @@ namespace Tipping {
       ~tipper();
 
       //thread method
-      void run();
+      vector<string> get_facts_from(string Term,string Html);
+      void           run();
   };
 
 //namespace path
