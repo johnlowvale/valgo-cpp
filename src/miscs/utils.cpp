@@ -17,6 +17,7 @@
 #include <time.h>
 
 //library headers
+#include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <bsoncxx/types.hpp>
@@ -256,6 +257,32 @@ void utils::print_request(request Request) {
   cout <<"\n" <<Request->remote_endpoint_address <<" ";
   cout <<Request->method <<" " <<Request->path <<"\n";
   cout.flush();
+}
+
+/**
+ * Read whole file to string
+ */
+string utils::read_file(string Path) {
+
+  //open file
+  ifstream File;
+  File.open(Path);
+
+  //read file to stringstream
+  stringstream Stream;
+  Stream <<File.rdbuf(); 
+  string Str = Stream.str();
+
+  return Str;
+}
+
+/**
+ * Get current working directory
+ */
+string utils::get_current_dir() {
+  stringstream Stream;
+  Stream <<filesystem::current_path();
+  return Stream.str();
 }
 
 /**

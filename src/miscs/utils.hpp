@@ -91,6 +91,10 @@ namespace Miscs {
       static void print(char const* Text);
       static void print(string Text);
       static void print_request(request Request);
+
+      //file operations
+      static string read_file(string Path);
+      static string get_current_dir();
   };//class
 
 }//namespace path

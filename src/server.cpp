@@ -9,6 +9,7 @@
 //standard c++ headers
 #include <climits>
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <stdio.h>
 #include <string>
@@ -18,6 +19,7 @@
 //library headers
 #include <server_http.hpp>
 #include <boost/any.hpp>
+#include <boost/algorithm/string.hpp>
 #include <bsoncxx/json.hpp>
 #include <mongocxx/cursor.hpp>
 #include <mongocxx/exception/operation_exception.hpp>
@@ -91,6 +93,38 @@ void server::handle_get_root(response Response,request Request) {
 
   //respond
   utils::send_text(Response,Content);
+}
+
+/**
+ * Handle admin URL
+ */
+void server::handle_get_admin(response Response,request Request) {
+  utils::print_request(Request);
+  
+  //read js/css/html files
+  string Js   = utils::read_file("../ui/index.js");
+  string Css  = utils::read_file("../ui/index.css");
+  string Html = utils::read_file("../ui/index.html");
+  cout <<Js <<endl;
+  cout <<Css <<endl;
+  cout <<Html <<endl;
+  cout.flush();
+
+  //put js/css into html
+  replace_first(
+    Html,
+    "<script src=\"index.js\"></script>",
+    "<script>"+Js+"</script>"
+  );
+
+  replace_first(
+    Html,
+    "<link rel=\"stylesheet\" href=\"index.css\"/>",
+    "<style>"+Css+"</style>"
+  );
+
+  //respond
+  utils::send_text(Response,Html);
 }
 
 /**
@@ -317,6 +351,9 @@ void server::initialise() {
   //web server urls
   this->Http_Server->resource["^/$"]["GET"] = 
   server::handle_get_root;
+
+  this->Http_Server->resource["^/admin$"]["GET"] = 
+  server::handle_get_admin;
 
   this->Http_Server->resource["^/webloc/add$"]["POST"] = 
   server::handle_post_webloc_add;
