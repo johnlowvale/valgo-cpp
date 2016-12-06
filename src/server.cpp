@@ -124,6 +124,32 @@ void server::handle_get_admin(response Response,request Request) {
 }
 
 /**
+ * Handle file URL
+ */
+void server::handle_get_file(response Response,request Request) {
+  utils::print_request(Request);
+  
+  //get file path from url
+  stringstream Stream;
+  Stream <<Request->path;
+  string Path = Stream.str();
+
+  //remove the heading
+  replace_first(Path,"/file/","");
+
+  //get file content
+  string Content = utils::read_file("../files/"+Path);
+  stringstream Out;
+  Out <<"Serving file " <<Path <<endl;
+  Out <<"File length: " <<Content.length() <<endl;
+  cout <<Out.str();
+  cout.flush();
+
+  //respond
+  utils::send_text(Response,Content);
+}
+
+/**
  * Handle /webloc/add URL
  */
 void server::handle_post_webloc_add(response Response,request Request) {
@@ -350,6 +376,9 @@ void server::initialise() {
 
   this->Http_Server->resource["^/admin$"]["GET"] = 
   server::handle_get_admin;
+
+  this->Http_Server->resource["^/file/.+$"]["GET"] = 
+  server::handle_get_file;
 
   this->Http_Server->resource["^/webloc/add$"]["POST"] = 
   server::handle_post_webloc_add;

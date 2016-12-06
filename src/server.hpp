@@ -67,6 +67,7 @@ class server {
     //url handlers
     static void handle_get_root(response Response,request Request);
     static void handle_get_admin(response Response,request Request);
+    static void handle_get_file(response Response,request Request);
     static void handle_post_webloc_add(response Response,request Request);
     static void handle_post_webloc_crawl(response Response,request Request);
     static void handle_post_crawlers_statuses(
