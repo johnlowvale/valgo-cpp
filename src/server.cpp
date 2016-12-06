@@ -105,10 +105,6 @@ void server::handle_get_admin(response Response,request Request) {
   string Js   = utils::read_file("../ui/index.js");
   string Css  = utils::read_file("../ui/index.css");
   string Html = utils::read_file("../ui/index.html");
-  cout <<Js <<endl;
-  cout <<Css <<endl;
-  cout <<Html <<endl;
-  cout.flush();
 
   //put js/css into html
   replace_first(
