@@ -324,7 +324,7 @@ void utils::send_text(response Response,string Text) {
 void utils::send_json(response Response,string Json_Str) {
   *Response <<"HTTP/1.1 200 OK\r\n";
   *Response <<"Access-Control-Allow-Origin: *\r\n";
-  *Response <<"Content-Type: application/json\r\n";
+  *Response <<"Content-Type: application/json; charset=utf-8\r\n";
   *Response <<"Content-Length: " <<Json_Str.length() <<"\r\n";
   *Response <<"\r\n";
   *Response <<Json_Str;
