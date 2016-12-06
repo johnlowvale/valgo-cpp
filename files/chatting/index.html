@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Lazada.vn</title>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+    <script src="/file/chatting/index.js"></script>
+
+    <link rel="stylesheet" href="/file/chatting/index.css"/>
+  </head>
+
+  <body>
+    <img src="/file/chatting/images/lazada.png" style="width:100%;"/>
+
+    <div id="Chat-Box"
+    style="position:fixed; bottom:0; right:30px; width:430px;
+    height:380px; background:wheat; border:1px solid blue; display:none;
+    margin:0; padding:10px;">
+
+      <div id="Log-Box"
+      style="width:430px; height:330px; background:ivory; overflow:auto;">
+      </div>
+
+      <textarea onkeyup="send_text(event);" id="Chat-Text"
+      style="width:430px; height:50px;"></textarea>
+    </div>
+
+    <button style="position:fixed; bottom:0; right:30px;"
+    onclick="toggle_chatbox();">
+      Chat Now!
+    </button>
+  </body>
+</html>
+<!--end of file-->
