@@ -24,4 +24,14 @@ function get_tip() {
   });
 }
 
+$(function(){
+  var Js_Href   = $("#Js-File").attr("href");
+  var Css_Href  = $("#Css-File").attr("href");
+  var Html_Href = $("#Html-File").attr("href");
+
+  $("#Js-File").attr("href","view-source:"+location.host+Js_Href);
+  $("#Css-File").attr("href","view-source:"+location.host+Css_Href);
+  $("#Html-File").attr("href","view-source:"+location.host+Html_Href);
+});
+
 //end of file

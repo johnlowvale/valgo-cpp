@@ -94,7 +94,7 @@ function use_lan_addr() {
  * Use live server address
  */
 function use_live_addr() {
-  $("#Server-Address").val("http://valgo1.abivin.vn:8891");
+  $("#Server-Address").val("http://apis.abivin.vn");
 }
 
 /**
