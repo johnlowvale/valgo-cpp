@@ -32,6 +32,10 @@ $(function(){
   $("#Js-File").attr("href","view-source:"+location.host+Js_Href);
   $("#Css-File").attr("href","view-source:"+location.host+Css_Href);
   $("#Html-File").attr("href","view-source:"+location.host+Html_Href);
+
+  $("#Js-File").html("view-source:"+location.host+Js_Href);
+  $("#Css-File").html("view-source:"+location.host+Css_Href);
+  $("#Html-File").html("view-source:"+location.host+Html_Href);
 });
 
 //end of file
