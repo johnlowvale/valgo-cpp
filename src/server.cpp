@@ -28,6 +28,7 @@
 #include <consts.hpp>
 #include <server.hpp>
 #include <types.hpp>
+#include <algos/learning/neunet.hpp>
 #include <algos/searching/searcher.hpp>
 #include <algos/tipping/tipper.hpp>
 #include <entities/webloc.hpp>
@@ -50,6 +51,7 @@ using bsoncxx::to_json;
 using bsoncxx::types::b_date;
 
 //in-project namespaces
+using namespace Algos::Learning;
 using namespace Algos::Searching;
 using namespace Algos::Tipping;
 using namespace Entities;
@@ -354,6 +356,13 @@ void server::create_indices() {
 }
 
 /**
+ * Test neural network
+ */
+void server::test_neunet() {
+  ???
+}
+
+/**
  * Initialise server
  */
 void server::initialise() {
@@ -361,6 +370,9 @@ void server::initialise() {
   //info
   cout <<"vAlgo++ Server v" <<server::VERSION <<"\n";
   cout <<"Copyright (c) Abivin JSC\n";
+
+  //test neural net
+  this->test_neunet();
 
   //create db connection
   this->Db_Client             = db::get_client();

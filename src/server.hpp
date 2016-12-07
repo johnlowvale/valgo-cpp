@@ -79,6 +79,7 @@ class server {
 
     //methods
     void create_indices();
+    void test_neunet();
     void initialise();
     void update_past_weblocs();
     bool is_not_queued(webloc* Webloc);

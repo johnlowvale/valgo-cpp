@@ -88,9 +88,10 @@ namespace Miscs {
       static ptree   parse_html(string Html);
 
       //miscellaneous methods
-      static void print(char const* Text);
-      static void print(string Text);
-      static void print_request(request Request);
+      static void   print(char const* Text);
+      static void   print(string Text);
+      static void   print_request(request Request);
+      static double random();
 
       //file operations
       static string read_file(string Path);

@@ -12,6 +12,7 @@
 //standard c++ headers
 #include <chrono>
 #include <iostream>
+#include <random>
 #include <sstream>
 #include <string>
 #include <time.h>
@@ -257,6 +258,18 @@ void utils::print_request(request Request) {
   cout <<"\n" <<Request->remote_endpoint_address <<" ";
   cout <<Request->method <<" " <<Request->path <<"\n";
   cout.flush();
+}
+
+/**
+ * Get a random number in [0..1)
+ * http://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution
+ */
+double utils::random() {
+  random_device               Device;
+  mt19937                     Generator(Device());
+  uniform_real_distribution<> Distribution(0,1);
+
+  return Distribution(Generator);
 }
 
 /**

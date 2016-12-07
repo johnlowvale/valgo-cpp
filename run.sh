@@ -266,6 +266,29 @@ else
   fi
 fi
 cd ../..
+#-------------------------------------------------------------------------------
+cd algos/learning
+md5sum neunet.cpp >temp.md5
+if cmp -s temp.md5 neunet.md5
+then
+  echo "neunet.cpp (unchanged)"
+else
+  echo "neunet.cpp is being compiled..."
+  if g++-6 -std=c++14 -Wall -Wfatal-errors -c -o neunet.o neunet.cpp
+  then
+    md5sum neunet.cpp >neunet.md5
+    tput setaf 2
+    echo "(compiled)"
+    tput sgr0
+  else
+    tput setaf 1
+    echo "(failed)"
+    tput sgr0
+    exit
+  fi
+fi
+cd ../..
+#-------------------------------------------------------------------------------
 echo "All algos files compiled."
 echo ""
 
@@ -301,14 +324,15 @@ cp tasks/*.o ../build
 cp entities/*.o ../build
 cp algos/searching/*.o ../build
 cp algos/tipping/*.o ../build
+cp algos/learning/*.o ../build
 echo "Copied."
 echo ""
 
 echo "Linking object files to executable..."
 cd ../build
 g++-6 -std=c++14 -Wall -Wfatal-errors -pthread -o server \
-server.o searcher.o tipper.o crawler.o utils.o db.o moment.o webloc.o \
-content.o relation.o node.o graph.o \
+server.o searcher.o tipper.o neunet.o crawler.o utils.o db.o moment.o \
+webloc.o content.o relation.o node.o graph.o \
 -lboost_system -lboost_filesystem -lboost_regex -lbsoncxx -lmongocxx \
 -luriparser -lhtmlcxx
 echo "Linked."
