@@ -12,23 +12,16 @@
   <body>
     <img src="/file/chatting/images/lazada.jpg" style="width:100%;"/>
 
-    <div id="Chat-Box"
-    style="position:fixed; bottom:0; right:30px; width:430px;
-    height:380px; background:wheat; border:1px solid blue; display:none;
-    margin:0; padding:10px;">
-
-      <div id="Log-Box"
-      style="width:430px; height:330px; background:ivory; overflow:auto;">
-      </div>
-
-      <textarea onkeyup="send_text(event);" id="Chat-Text"
-      style="width:430px; height:50px;"></textarea>
+    <!--chatbox embed/begin-->
+    <div id="Chat-Box">
+      <span id="Chat-Close" onclick="toggle_chatbox();">&#10060;</span>
+      <div id="Chat-Log"></div>
+      <textarea id="Chat-Text" onkeyup="send_text(event);"></textarea>
     </div>
+    <img id="Chat-Button" onclick="toggle_chatbox();"
+    src="/file/chatting/images/chat-bubble.png"/>
+    <!--chatbox embed/end-->
 
-    <button style="position:fixed; bottom:0; right:30px;"
-    onclick="toggle_chatbox();">
-      Chat Now!
-    </button>
   </body>
 </html>
 <!--end of file-->

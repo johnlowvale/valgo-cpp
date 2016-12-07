@@ -11,7 +11,7 @@ function send_text(event) {
     return;
   }
 
-  var Logbox = $("#Log-Box");
+  var Logbox = $("#Chat-Log");
   var Html   = Logbox.html();
 
   Html += "Visitor: "+Text+"<br/>";
@@ -24,12 +24,17 @@ function send_text(event) {
 
 function toggle_chatbox() {
   var Box     = $("#Chat-Box");
+  var Button  = $("#Chat-Button");
   var Display = Box.css("display");
 
-  if (Display=="none")
+  if (Display=="none") {
     Box.css("display","block");
-  else
+    Button.css("display","none");
+  }
+  else {
     Box.css("display","none");
+    Button.css("display","block");
+  }
 }
 
 //end of file
