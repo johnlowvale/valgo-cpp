@@ -55,6 +55,10 @@ typedef std::shared_ptr<http_server::Response> response;
 typedef std::shared_ptr<http_server::Request>  request;
 typedef std::shared_ptr<http_client::Response> http_response;
 
+//types for neural network
+typedef vector<double>                      vd;
+typedef pair<vector<double>,vector<double>> sample;
+
 //include guard end
 #endif
 

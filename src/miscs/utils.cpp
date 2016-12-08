@@ -10,6 +10,7 @@
 #endif
 
 //standard c++ headers
+#include <cmath>
 #include <chrono>
 #include <iostream>
 #include <random>
@@ -296,6 +297,32 @@ string utils::get_current_dir() {
   stringstream Stream;
   Stream <<filesystem::current_path();
   return Stream.str();
+}
+
+/**
+ * Sigmoid function used by neuron
+ */
+double utils::sigmoid(double X) {
+  return tanh(X);
+}
+
+/**
+ * Derivative of sigmoid function being used
+ */
+double utils::dsigmoid(double X) {
+  return (double)1 - (X*X);
+}
+
+/**
+ * Get scalar product of 2 vectors
+ */
+double scalar_product(vector<double> Left,vector<double> Right) {
+  double Result = 0;
+
+  for (long Index=0; Index<Left.size(); Index++)
+    Result += Left[Index]*Right[Index];
+
+  return Result;
 }
 
 /**

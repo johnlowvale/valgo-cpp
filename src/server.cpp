@@ -359,7 +359,28 @@ void server::create_indices() {
  * Test neural network
  */
 void server::test_neunet() {
-  ???
+
+  //neural network
+  neunet Neunet(2,(vector<long>){2,1});
+
+  //training data for logic 'and'
+  vector<sample> Samples;
+  Samples.push_back(sample{ vd{0,0}, vd{0} });
+  Samples.push_back(sample{ vd{0,1}, vd{0} });
+  Samples.push_back(sample{ vd{1,0}, vd{0} });
+  Samples.push_back(sample{ vd{1,1}, vd{1} });
+
+  //train weights using the above samples
+  Neunet.train_weights(Samples,0.1,0.1);
+
+  //check using training data
+  for (long Index=0; Index<Samples.size(); Index++) {
+    sample         Sample = Samples[Index];
+    vector<double> Result = Neunet.propagate_forward(Sample.first);
+
+    //log
+    cout <<Sample.first[0]<<" and "<<Sample.first[1]<<" -> "<<Result[0]<<endl;
+  }
 }
 
 /**

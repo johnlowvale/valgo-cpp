@@ -96,6 +96,11 @@ namespace Miscs {
       //file operations
       static string read_file(string Path);
       static string get_current_dir();
+
+      //neural network related
+      double sigmoid(double X);
+      double dsigmoid(double X);
+      double scalar_product(vector<double> Left,vector<double> Right);
   };//class
 
 }//namespace path

@@ -268,6 +268,28 @@ fi
 cd ../..
 #-------------------------------------------------------------------------------
 cd algos/learning
+md5sum neuron.cpp >temp.md5
+if cmp -s temp.md5 neuron.md5
+then
+  echo "neuron.cpp (unchanged)"
+else
+  echo "neuron.cpp is being compiled..."
+  if g++-6 -std=c++14 -Wall -Wfatal-errors -c -o neuron.o neuron.cpp
+  then
+    md5sum neuron.cpp >neuron.md5
+    tput setaf 2
+    echo "(compiled)"
+    tput sgr0
+  else
+    tput setaf 1
+    echo "(failed)"
+    tput sgr0
+    exit
+  fi
+fi
+cd ../..
+#-------------------------------------------------------------------------------
+cd algos/learning
 md5sum neunet.cpp >temp.md5
 if cmp -s temp.md5 neunet.md5
 then
@@ -331,8 +353,8 @@ echo ""
 echo "Linking object files to executable..."
 cd ../build
 g++-6 -std=c++14 -Wall -Wfatal-errors -pthread -o server \
-server.o searcher.o tipper.o neunet.o crawler.o utils.o db.o moment.o \
-webloc.o content.o relation.o node.o graph.o \
+server.o searcher.o tipper.o neuron.o neunet.o crawler.o utils.o db.o \
+moment.o webloc.o content.o relation.o node.o graph.o \
 -lboost_system -lboost_filesystem -lboost_regex -lbsoncxx -lmongocxx \
 -luriparser -lhtmlcxx
 echo "Linked."
