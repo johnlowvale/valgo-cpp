@@ -40,7 +40,7 @@ neunet::neunet(long Input_Count,vector<long> Neuron_Nums) {
   this->Inputs.push_back(1);
 
   //initialise layers
-  for (long Index=1; Index<=Neuron_Nums.size(); Index++) {
+  for (long Index=1; Index<=(long)Neuron_Nums.size(); Index++) {
     this->Layers[Index].push_back((vector<neuron*>){});
 
     //neurons in a layer
@@ -66,8 +66,8 @@ neunet::neunet(long Input_Count,vector<long> Neuron_Nums) {
  * Destructor 
  */
 neunet::~neunet() {
-  for (long Index=0; Index<this->Layers.size(); Index++)
-    for (long Jndex=0; Jndex<this->Layers[Index].size(); Jndex++)
+  for (long Index=0; Index<(long)this->Layers.size(); Index++)
+    for (long Jndex=0; Jndex<(long)this->Layers[Index].size(); Jndex++)
       delete this->Layers[Index][Jndex];
 }
 
@@ -75,8 +75,8 @@ neunet::~neunet() {
  * Randomise weights of all neurons of all layers
  */
 void neunet::randomise_weights() {
-  for (long Index=0; Index<this->Layers.size(); Index++)
-    for (long Jndex=0; Jndex<this->Layers[Index].size(); Jndex++)
+  for (long Index=0; Index<(long)this->Layers.size(); Index++)
+    for (long Jndex=0; Jndex<(long)this->Layers[Index].size(); Jndex++)
       this->Layers[Index][Jndex]->randomise_weights();
 }
 
@@ -86,7 +86,7 @@ void neunet::randomise_weights() {
 vector<double> neunet::get_layer_outputs(long Layer_Index) {
   vector<double> Layer_Outputs;
 
-  for (long Index=0; Index<this->Layers[Layer_Index].size(); Index++) {
+  for (long Index=0; Index<(long)this->Layers[Layer_Index].size(); Index++) {
     neuron* Neuron = this->Layers[Layer_Index][Index];
     Layer_Outputs.push_back(Neuron->get_output());
   }
@@ -103,7 +103,7 @@ vector<double> neunet::propagate_forwards(vector<double> Training_Inputs) {
   this->Inputs = Training_Inputs;
 
   //propagate forwards thru' all layers
-  for (long Index=0; Index<this->Layers.size(); Index++) {
+  for (long Index=0; Index<(long)this->Layers.size(); Index++) {
     vector<double> Layer_Inputs;
 
     //inputs for neurons in a layer
@@ -113,7 +113,7 @@ vector<double> neunet::propagate_forwards(vector<double> Training_Inputs) {
       Layer_Inputs = this->get_layer_outputs(Index-1);
 
     //set input for all neurons in layer and compute
-    for (long Jndex=0; Jndex<this->Layers[Index].size(); Jndex++) {
+    for (long Jndex=0; Jndex<(long)this->Layers[Index].size(); Jndex++) {
       neuron* Neuron = this->Layers[Index][Jndex];
 
       Neuron->set_inputs(Layer_Inputs);
@@ -122,7 +122,7 @@ vector<double> neunet::propagate_forwards(vector<double> Training_Inputs) {
   }//index
 
   //return outputs
-  long Layer_Count = this->Layers.size();
+  long Layer_Count = (long)this->Layers.size();
   return this->get_layer_outputs(Layer_Count-1);
 }
 
@@ -131,7 +131,7 @@ vector<double> neunet::propagate_forwards(vector<double> Training_Inputs) {
  */
 void neunet::propagate_backwards(vector<double> Expected_Outputs,
 double Learning_Rate,double Momentum) {
-  long Layer_Count = this->Layers.size();
+  long Layer_Count = (long)this->Layers.size();
 
   //deltas (each error value has 1 delta along side)
   vector<vector<double>> Deltas;
@@ -144,7 +144,7 @@ double Learning_Rate,double Momentum) {
   //compute errors on last layer
   //loop thru neurons
   vector<double> Errors;
-  for (long Index=0; Index<this->Layers[Layer_Count-1].size(); Index++) {
+  for (long Index=0; Index<(long)this->Layers[Layer_Count-1].size(); Index++) {
     neuron* Neuron = this->Layers[Layer_Count-1][Index]; 
 
     double  Output = Neuron.get_output();
@@ -160,12 +160,12 @@ double Learning_Rate,double Momentum) {
   for (long Index=Layer_Count-2; Index>=0; Index--) {
 
     //loop thru' neurons
-    for (long Jndex=0; Jndex<this->Layers[Index].size(); Jndex++) {
+    for (long Jndex=0; Jndex<(long)this->Layers[Index].size(); Jndex++) {
       neuron* Left_Neuron = this->Layers[Index][Jndex];
 
       //calculate delta from layer on the right side
       double Delta = 0;
-      for (long Kndex=0; Kndex<this->Layers[Index+1].size(); Kndex++) {
+      for (long Kndex=0; Kndex<(long)this->Layers[Index+1].size(); Kndex++) {
         neuron* Right_Neuron = this->Layers[Index+1][Kndex];
 
         Delta += Deltas[Kndex]*Right_Neuron.Weights[Jndex];
@@ -179,9 +179,9 @@ double Learning_Rate,double Momentum) {
   vector<double> Input_Deltas;
   Input_Deltas.reserve(this->Inputs.size());
 
-  for (long Index=0; Index<Input_Deltas.size(); Index++) {
+  for (long Index=0; Index<(long)Input_Deltas.size(); Index++) {
     double Delta = 0;
-    for (long Jndex=0; Jndex<this->Layers[0].size(); Jndex++) {
+    for (long Jndex=0; Jndex<(long)this->Layers[0].size(); Jndex++) {
       neuron* Right_Neuron = this->Layers[0][Jndex];
 
       Delta += Deltas[Jndex]*Right_Neuron.Weights[Index];
@@ -192,7 +192,7 @@ double Learning_Rate,double Momentum) {
 
   //update weights
   //loop thru' layers
-  for (long Index=0; Index<this->Layers.size(); Index++) {
+  for (long Index=0; Index<(long)this->Layers.size(); Index++) {
     vector<neuron*> Neurons = this->Layers[Index];
 
     //left outputs & deltas
@@ -208,11 +208,11 @@ double Learning_Rate,double Momentum) {
     }
 
     //loop thru' neurons
-    for (long Jndex=0; Jndex<this->Layers[Index].size(); Jndex++) {
+    for (long Jndex=0; Jndex<(long)this->Layers[Index].size(); Jndex++) {
       neuron* Neuron = Neurons[Jndex];
 
       //update weights (on dendrites)
-      for (long Kndex=0; Kndex<Neuron->Weights.size(); Kndex++) {
+      for (long Kndex=0; Kndex<(long)Neuron->Weights.size(); Kndex++) {
         double Change = Left_Outputs[Kndex]*Left_Deltas[Kndex];
 
         Neuron->Weights[Kndex] += 
@@ -237,7 +237,7 @@ double Learning_Rate,double Momentum){
   while (true) {
     double Error_Sum = 0;
 
-    for (long Index=0; Index<Samples.size(); Index++) {
+    for (long Index=0; Index<(long)Samples.size(); Index++) {
       sample& Sample = Samples[Index];
 
       this->propagate_forwards(Sample.first);

@@ -374,7 +374,7 @@ void server::test_neunet() {
   Neunet.train_weights(Samples,0.1,0.1);
 
   //check using training data
-  for (long Index=0; Index<Samples.size(); Index++) {
+  for (long Index=0; Index<(long)Samples.size(); Index++) {
     sample         Sample = Samples[Index];
     vector<double> Result = Neunet.propagate_forward(Sample.first);
 

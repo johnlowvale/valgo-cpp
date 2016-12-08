@@ -319,7 +319,7 @@ double utils::dsigmoid(double X) {
 double scalar_product(vector<double> Left,vector<double> Right) {
   double Result = 0;
 
-  for (long Index=0; Index<Left.size(); Index++)
+  for (long Index=0; Index<(long)Left.size(); Index++)
     Result += Left[Index]*Right[Index];
 
   return Result;
