@@ -98,9 +98,9 @@ namespace Miscs {
       static string get_current_dir();
 
       //neural network related
-      double sigmoid(double X);
-      double dsigmoid(double X);
-      double scalar_product(vector<double> Left,vector<double> Right);
+      static double sigmoid(double X);
+      static double dsigmoid(double X);
+      static double scalar_product(vector<double> Left,vector<double> Right);
   };//class
 
 }//namespace path
