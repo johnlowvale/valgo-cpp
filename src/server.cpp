@@ -359,6 +359,7 @@ void server::create_indices() {
  * Test neural network
  */
 void server::test_neunet() {
+  cout <<"\nNeunet test:" <<endl;
 
   //neural network
   neunet Neunet(2,(vector<long>){2,1});
