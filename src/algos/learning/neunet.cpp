@@ -18,12 +18,14 @@
 
 //in-project namespaces
 #include <types.hpp>
+#include <miscs/utils.hpp>
 
 //standard c++ namespaces
 using namespace std;
 
 //in-project namespaces
 using namespace Algos::Learning;
+using namespace Miscs;
 
 /**
  * Constructor
@@ -41,7 +43,7 @@ neunet::neunet(long Input_Count,vector<long> Neuron_Nums) {
 
   //initialise layers
   for (long Index=1; Index<=(long)Neuron_Nums.size(); Index++) {
-    this->Layers[Index].push_back((vector<neuron*>){});
+    this->Layers.push_back((vector<neuron*>){});
 
     //neurons in a layer
     for (long Jndex=0; Jndex<Neuron_Nums[Index]; Jndex++) {
@@ -129,7 +131,7 @@ vector<double> neunet::propagate_forwards(vector<double> Training_Inputs) {
 /**
  * Propagate backwards
  */
-void neunet::propagate_backwards(vector<double> Expected_Outputs,
+double neunet::propagate_backwards(vector<double> Expected_Outputs,
 double Learning_Rate,double Momentum) {
   long Layer_Count = (long)this->Layers.size();
 
@@ -147,7 +149,7 @@ double Learning_Rate,double Momentum) {
   for (long Index=0; Index<(long)this->Layers[Layer_Count-1].size(); Index++) {
     neuron* Neuron = this->Layers[Layer_Count-1][Index]; 
 
-    double  Output = Neuron.get_output();
+    double  Output = Neuron->get_output();
     double  Error  = Expected_Outputs[Index] - Output;
     double  Delta  = Error*utils::dsigmoid(Output);
 
@@ -168,10 +170,10 @@ double Learning_Rate,double Momentum) {
       for (long Kndex=0; Kndex<(long)this->Layers[Index+1].size(); Kndex++) {
         neuron* Right_Neuron = this->Layers[Index+1][Kndex];
 
-        Delta += Deltas[Kndex]*Right_Neuron.Weights[Jndex];
+        Delta += Deltas[Index+1][Kndex]*Right_Neuron->Weights[Jndex];
       }
 
-      Deltas[Index][Jndex] = Delta*utils::dsigmoid(Left_Neuron.Output);
+      Deltas[Index][Jndex] = Delta*utils::dsigmoid(Left_Neuron->Output);
     }//jndex
   }//index
 
@@ -184,7 +186,7 @@ double Learning_Rate,double Momentum) {
     for (long Jndex=0; Jndex<(long)this->Layers[0].size(); Jndex++) {
       neuron* Right_Neuron = this->Layers[0][Jndex];
 
-      Delta += Deltas[Jndex]*Right_Neuron.Weights[Index];
+      Delta += Deltas[0][Jndex]*Right_Neuron->Weights[Index];
     }
 
     Input_Deltas[Index] = Delta*utils::dsigmoid(this->Inputs[Index]);

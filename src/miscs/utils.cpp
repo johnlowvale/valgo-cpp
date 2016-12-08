@@ -316,7 +316,7 @@ double utils::dsigmoid(double X) {
 /**
  * Get scalar product of 2 vectors
  */
-double scalar_product(vector<double> Left,vector<double> Right) {
+double utils::scalar_product(vector<double> Left,vector<double> Right) {
   double Result = 0;
 
   for (long Index=0; Index<(long)Left.size(); Index++)

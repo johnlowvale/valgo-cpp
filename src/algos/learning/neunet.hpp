@@ -18,6 +18,7 @@
 
 //in-project headers
 #include <types.hpp>
+#include <algos/learning/neuron.hpp>
 
 //standard c++ namespaces
 using namespace std;

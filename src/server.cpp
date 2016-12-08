@@ -376,7 +376,7 @@ void server::test_neunet() {
   //check using training data
   for (long Index=0; Index<(long)Samples.size(); Index++) {
     sample         Sample = Samples[Index];
-    vector<double> Result = Neunet.propagate_forward(Sample.first);
+    vector<double> Result = Neunet.propagate_forwards(Sample.first);
 
     //log
     cout <<Sample.first[0]<<" and "<<Sample.first[1]<<" -> "<<Result[0]<<endl;
