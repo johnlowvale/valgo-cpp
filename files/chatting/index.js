@@ -9,9 +9,10 @@
 /**
  * Append somthing to chatlog
  */
-function append_chatlog(Who,Sentence) {
+function append_chatlog(Who,Sentence,Colour) {
   var Logbox = $("#Chat-Log");
-  var Html   = Logbox.html()+Who+": "+Sentence+"<br/>";
+  var Html   = Logbox.html()+
+  "<div style='color:"+Colour+"'>"+Who+": "+Sentence+"</div>";
 
   Logbox.html(Html);
   Logbox.get(0).scrollTop = Number.MAX_VALUE;
@@ -37,7 +38,7 @@ function send_text(event) {
   }
 
   //log the input text
-  append_chatlog("Visitor",Text);
+  append_chatlog("Visitor",Text,"gray");
   Textbox.val("");
   Textbox.focus();
 
@@ -46,11 +47,11 @@ function send_text(event) {
     Text: Text
   })).
   done(function(Data){
-    append_chatlog("Chatbot",Data.Reply);
+    append_chatlog("Chatbot",Data.Reply,"black");
   }).
   fail(function(Data){
     console.log(Data);
-    append_chatlog("System","FAILED_TO_GET_REPLY");
+    append_chatlog("System","FAILED_TO_GET_REPLY","red");
   });
 }
 
