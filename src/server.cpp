@@ -29,6 +29,7 @@
 #include <consts.hpp>
 #include <server.hpp>
 #include <types.hpp>
+#include <algos/chatting/chatter.hpp>
 #include <algos/learning/neunet.hpp>
 #include <algos/searching/searcher.hpp>
 #include <algos/tipping/tipper.hpp>
@@ -52,6 +53,7 @@ using bsoncxx::to_json;
 using bsoncxx::types::b_date;
 
 //in-project namespaces
+using namespace Algos::Chatting;
 using namespace Algos::Learning;
 using namespace Algos::Searching;
 using namespace Algos::Tipping;
@@ -336,6 +338,22 @@ void server::handle_post_tip(response Response,request Request) {
 }
 
 /**
+ * Handle /chat URL
+ */
+void server::handle_post_chat(response Response,request Request) {
+  chatter Chatter(
+    server::Singleton->Db_Client,Request,Response
+  );
+
+  //start new thread
+  thread Chatter_Thread(&chatter::run,&Chatter);
+  Chatter_Thread.join();
+
+  //not to detach here coz detaching the thread means running out of this
+  //method and the 2 variables Response, Request will be disposed.
+}
+
+/**
  * Create indices in db
  */
 void server::create_indices() {
@@ -454,6 +472,9 @@ void server::initialise() {
 
   this->Http_Server->resource["^/tip$"]["POST"] = 
   server::handle_post_tip;
+
+  this->Http_Server->resource["^/chat$"]["POST"] = 
+  server::handle_post_chat;
 }
 
 /**

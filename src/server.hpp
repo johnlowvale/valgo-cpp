@@ -76,6 +76,7 @@ class server {
                 response Response,request Request);
     static void handle_post_search(response Response,request Request);
     static void handle_post_tip(response Response,request Request);
+    static void handle_post_chat(response Response,request Request);
 
     //methods
     void create_indices();

@@ -311,6 +311,28 @@ else
 fi
 cd ../..
 #-------------------------------------------------------------------------------
+cd algos/chatting
+md5sum chatter.cpp >temp.md5
+if cmp -s temp.md5 chatter.md5
+then
+  echo "chatter.cpp (unchanged)"
+else
+  echo "chatter.cpp is being compiled..."
+  if g++-6 -std=c++14 -Wall -Wfatal-errors -c -o chatter.o chatter.cpp
+  then
+    md5sum chatter.cpp >chatter.md5
+    tput setaf 2
+    echo "(compiled)"
+    tput sgr0
+  else
+    tput setaf 1
+    echo "(failed)"
+    tput sgr0
+    exit
+  fi
+fi
+cd ../..
+#-------------------------------------------------------------------------------
 echo "All algos files compiled."
 echo ""
 
@@ -347,14 +369,15 @@ cp entities/*.o ../build
 cp algos/searching/*.o ../build
 cp algos/tipping/*.o ../build
 cp algos/learning/*.o ../build
+cp algos/chatting/*.o ../build
 echo "Copied."
 echo ""
 
 echo "Linking object files to executable..."
 cd ../build
 g++-6 -std=c++14 -Wall -Wfatal-errors -pthread -o server \
-server.o searcher.o tipper.o neuron.o neunet.o crawler.o utils.o db.o \
-moment.o webloc.o content.o relation.o node.o graph.o \
+server.o searcher.o tipper.o neuron.o neunet.o chatter.o crawler.o utils.o \
+db.o moment.o webloc.o content.o relation.o node.o graph.o \
 -lboost_system -lboost_filesystem -lboost_regex -lbsoncxx -lmongocxx \
 -luriparser -lhtmlcxx
 echo "Linked."

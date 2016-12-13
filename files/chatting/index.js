@@ -7,6 +7,17 @@
  */
 
 /**
+ * Append somthing to chatlog
+ */
+function append_chatlog(Who,Sentence) {
+  var Logbox = $("#Chat-Log");
+  var Html   = Logbox.html()+Who+": "+Sentence+"<br/>";
+
+  Logbox.html(Html);
+  Logbox.get(0).scrollTop = Number.MAX_VALUE;
+}
+
+/**
  * Send text to server
  */
 function send_text(event) {
@@ -26,16 +37,21 @@ function send_text(event) {
   }
 
   //log the input text
-  var Logbox = $("#Chat-Log");
-  var Html   = Logbox.html()+"Visitor: "+Text+"<br/>";
-
-  Logbox.html(Html);
-  Logbox.get(0).scrollTop = Number.MAX_VALUE;
+  append_chatlog("Visitor",Text);
   Textbox.val("");
   Textbox.focus();
 
   //send to server
-  //???
+  $.post("http://"+location.host+"/chat",JSON.stringify({
+    Text: Text
+  })).
+  done(function(Data){
+    append_chatlog("Chatbot",Data.Reply);
+  }).
+  fail(function(Data){
+    console.log(Data);
+    append_chatlog("System","FAILED_TO_GET_REPLY");
+  });
 }
 
 /**
