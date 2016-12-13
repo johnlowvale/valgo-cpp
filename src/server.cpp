@@ -8,6 +8,7 @@
 
 //standard c++ headers
 #include <climits>
+#include <ios>
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -359,7 +360,7 @@ void server::create_indices() {
  * Test neural network
  */
 void server::test_neunet() {
-  cout <<"\nNeunet test:" <<endl;
+  cout <<"\nNeunet test..." <<endl;
 
   //neural network
   neunet Neunet(2,(vector<long>){2,1});
@@ -372,7 +373,14 @@ void server::test_neunet() {
   Samples.push_back(sample{ vd{1,1}, vd{1} });
 
   //train weights using the above samples
-  Neunet.train_weights(Samples,0.1,0.1);
+  double Acceptable_Average_Error = 0.01;
+  long   Set_Iteration_Count      = 
+         Neunet.train_weights(Samples,0.1,0.1,Acceptable_Average_Error);
+  long   Sample_Iteration_Count   = Set_Iteration_Count*Samples.size();
+  cout <<"Acceptable average error:   " <<Acceptable_Average_Error <<endl;
+  cout <<"Training set samples:       " <<Samples.size() <<endl;
+  cout <<"Training set iterations:    " <<Set_Iteration_Count <<endl;
+  cout <<"Training sample iterations: " <<Sample_Iteration_Count <<endl;
 
   //check using training data
   for (long Index=0; Index<(long)Samples.size(); Index++) {
@@ -380,7 +388,10 @@ void server::test_neunet() {
     vector<double> Result = Neunet.feedforward(Sample.first);
 
     //log
-    cout <<Sample.first[0]<<" and "<<Sample.first[1]<<" --> "<<Result[0]<<endl;
+    cout <<Sample.first[0]<<" and "<<Sample.first[1]<<" --> "
+    <<showpos <<fixed <<Result[0] <<noshowpos;
+    cout.unsetf(ios_base::fixed);
+    cout <<" --> " <<(long)round(Result[0]) <<endl;
   }
 
   exit(0);

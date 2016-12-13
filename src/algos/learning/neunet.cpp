@@ -130,18 +130,22 @@ vector<double> neunet::feedforward(vector<double> Training_Inputs) {
 
 /**
  * Backpropagate to calculate errors and update weights
- * @return Average of all abs(error) at last layer
+ * @return Sum of all abs(error) at last layer
  */
 double neunet::backpropagate(vector<double> Expected_Outputs,
 double Learning_Rate,double Momentum) {
-  long Layer_Count = (long)this->Layers.size();
+  long   Layer_Count = (long)this->Layers.size();
+  double Error_Sum   = 0;
 
   //calculate errors
   for (long Index=Layer_Count-1; Index>=0; Index--) {
     if (Index==Layer_Count-1) {
       for (long Jndex=0; Jndex<(long)this->Layers[Index].size(); Jndex++) {
-        this->Layers[Index][Jndex]->Error = 
+        double Error = 
         Expected_Outputs[Jndex]-this->Layers[Index][Jndex]->Output;
+
+        this->Layers[Index][Jndex]->Error = Error;
+        Error_Sum += abs(Error);
       }
     }
     else {
@@ -172,7 +176,7 @@ double Learning_Rate,double Momentum) {
       for (long Kndex=0; Kndex<(long)Neuron->Weights.size(); Kndex++) {
         double Weight_Change = 
         Neuron->Inputs[Kndex]*Neuron->Error*Learning_Rate +
-        Neuron->Weights[Kndex]*Momentum;
+        Neuron->Changes[Kndex]*Momentum;
 
         Neuron->Weights[Kndex] += Weight_Change;
         Neuron->Changes[Kndex]  = Weight_Change;
@@ -180,27 +184,39 @@ double Learning_Rate,double Momentum) {
     }
   }
 
-  return 0;
+  return Error_Sum;
 }
 
 /**
  * Train weights
  */
-void neunet::train_weights(vector<sample> Samples,
-double Learning_Rate,double Momentum){
+long neunet::train_weights(vector<sample> Samples,
+double Learning_Rate,double Momentum,double Acceptable_Average_Error){
 
   //loop until error sum is in acceptable range
-  for (long Index=0; Index<1000; Index++) {
+  long Set_Iteration_Count = 0;
+  while (true) {
+    double Error_Total = 0;
 
     for (long Index=0; Index<(long)Samples.size(); Index++) {
       sample& Sample = Samples[Index];
 
       this->feedforward(Sample.first);
-      this->backpropagate(
+      double Error_Sum = this->backpropagate(
         Sample.second,Learning_Rate,Momentum
       );
+
+      Error_Total += Error_Sum;
     }//for
+
+    Set_Iteration_Count++;
+    double Average_Error = Error_Total/(double)Samples.size();
+
+    if (Average_Error<Acceptable_Average_Error)
+      break;
   }
+
+  return Set_Iteration_Count;
 }
 
 //end of file

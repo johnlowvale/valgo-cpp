@@ -47,8 +47,9 @@ namespace Learning {
       vector<double> feedforward(vector<double> Training_Inputs);
       double         backpropagate(vector<double> Expected_Outputs,
                      double Learning_Rate,double Momentum);
-      void           train_weights(vector<sample> Samples,
-                     double Learning_Rate,double Momentum);
+      long           train_weights(vector<sample> Samples,
+                     double Learning_Rate,double Momentum,
+                     double Acceptable_Average_Error);
   };
 
 //namespace path
