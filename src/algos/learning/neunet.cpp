@@ -42,7 +42,7 @@ neunet::neunet(long Input_Count,vector<long> Neuron_Nums) {
   this->Inputs.push_back(1);
 
   //initialise layers
-  for (long Index=1; Index<=(long)Neuron_Nums.size(); Index++) {
+  for (long Index=0; Index<(long)Neuron_Nums.size(); Index++) {
     this->Layers.push_back((vector<neuron*>){});
 
     //neurons in a layer
@@ -97,9 +97,9 @@ vector<double> neunet::get_layer_outputs(long Layer_Index) {
 }
 
 /**
- * Propagate forwards
+ * Feedforward to get final outputs
  */
-vector<double> neunet::propagate_forwards(vector<double> Training_Inputs) {
+vector<double> neunet::feedforward(vector<double> Training_Inputs) {
 
   //save inputs
   this->Inputs = Training_Inputs;
@@ -110,7 +110,7 @@ vector<double> neunet::propagate_forwards(vector<double> Training_Inputs) {
 
     //inputs for neurons in a layer
     if (Index==0)
-      Layer_Inputs = Training_Inputs;
+      Layer_Inputs = this->Inputs;
     else
       Layer_Inputs = this->get_layer_outputs(Index-1);
 
@@ -129,104 +129,58 @@ vector<double> neunet::propagate_forwards(vector<double> Training_Inputs) {
 }
 
 /**
- * Propagate backwards
+ * Backpropagate to calculate errors and update weights
+ * @return Average of all abs(error) at last layer
  */
-double neunet::propagate_backwards(vector<double> Expected_Outputs,
+double neunet::backpropagate(vector<double> Expected_Outputs,
 double Learning_Rate,double Momentum) {
   long Layer_Count = (long)this->Layers.size();
 
-  //deltas (each error value has 1 delta along side)
-  vector<vector<double>> Deltas;
-  for (long Index=0; Index<Layer_Count; Index++) {
-    vector<double> Vec;
-    Vec.reserve(this->Layers[Index].size());
-    Deltas.push_back(Vec);
-  }
-
-  //compute errors on last layer
-  //loop thru neurons
-  vector<double> Errors;
-  for (long Index=0; Index<(long)this->Layers[Layer_Count-1].size(); Index++) {
-    neuron* Neuron = this->Layers[Layer_Count-1][Index]; 
-
-    double  Output = Neuron->get_output();
-    double  Error  = Expected_Outputs[Index] - Output;
-    double  Delta  = Error*utils::dsigmoid(Output);
-
-    Errors.push_back(Error);
-    Deltas[Layer_Count-1][Index] = Delta;
-  }
-
-  //compute errors on other layers
-  //loop thru layers
-  for (long Index=Layer_Count-2; Index>=0; Index--) {
-
-    //loop thru' neurons
-    for (long Jndex=0; Jndex<(long)this->Layers[Index].size(); Jndex++) {
-      neuron* Left_Neuron = this->Layers[Index][Jndex];
-
-      //calculate delta from layer on the right side
-      double Delta = 0;
-      for (long Kndex=0; Kndex<(long)this->Layers[Index+1].size(); Kndex++) {
-        neuron* Right_Neuron = this->Layers[Index+1][Kndex];
-
-        Delta += Deltas[Index+1][Kndex]*Right_Neuron->Weights[Jndex];
+  //calculate errors
+  for (long Index=Layer_Count-1; Index>=0; Index--) {
+    if (Index==Layer_Count-1) {
+      for (long Jndex=0; Jndex<(long)this->Layers[Index].size(); Jndex++) {
+        this->Layers[Index][Jndex]->Error = 
+        Expected_Outputs[Jndex]-this->Layers[Index][Jndex]->Output;
       }
-
-      Deltas[Index][Jndex] = Delta*utils::dsigmoid(Left_Neuron->Output);
-    }//jndex
-  }//index
-
-  //compute deltas on input layer
-  vector<double> Input_Deltas;
-  Input_Deltas.reserve(this->Inputs.size());
-
-  for (long Index=0; Index<(long)Input_Deltas.size(); Index++) {
-    double Delta = 0;
-    for (long Jndex=0; Jndex<(long)this->Layers[0].size(); Jndex++) {
-      neuron* Right_Neuron = this->Layers[0][Jndex];
-
-      Delta += Deltas[0][Jndex]*Right_Neuron->Weights[Index];
-    }
-
-    Input_Deltas[Index] = Delta*utils::dsigmoid(this->Inputs[Index]);
-  }
-
-  //update weights
-  //loop thru' layers
-  for (long Index=0; Index<(long)this->Layers.size(); Index++) {
-    vector<neuron*> Neurons = this->Layers[Index];
-
-    //left outputs & deltas
-    vector<double> Left_Outputs;
-    vector<double> Left_Deltas; 
-    if (Index==0) {
-      Left_Outputs = this->Inputs;
-      Left_Deltas  = Input_Deltas;
     }
     else {
-      Left_Outputs = this->get_layer_outputs(Index-1);
-      Left_Deltas  = Deltas[Index-1];
-    }
+      vector<double> Errors;
+      vector<double> Weights;
 
-    //loop thru' neurons
-    for (long Jndex=0; Jndex<(long)this->Layers[Index].size(); Jndex++) {
-      neuron* Neuron = Neurons[Jndex];
+      for (long Jndex=0; Jndex<(long)this->Layers[Index+1].size(); Jndex++)
+        Errors.push_back(this->Layers[Index+1][Jndex]->Error);
 
-      //update weights (on dendrites)
-      for (long Kndex=0; Kndex<(long)Neuron->Weights.size(); Kndex++) {
-        double Change = Left_Outputs[Kndex]*Left_Deltas[Kndex];
+      for (long Jndex=0; Jndex<(long)this->Layers[Index].size(); Jndex++) {
+        Weights.clear();
+        neuron* Neuron = this->Layers[Index][Jndex];
 
-        Neuron->Weights[Kndex] += 
-        Learning_Rate*Change + Momentum*Neuron->Changes[Kndex];
+        for (long Kndex=0; Kndex<(long)this->Layers[Index+1].size(); Kndex++)
+          Weights.push_back(this->Layers[Index+1][Kndex]->Weights[Jndex]);
 
-        Neuron->Changes[Kndex] = Change;
+        Neuron->Error = 
+        utils::scalar_product(Errors,Weights)*utils::dsigmoid(Neuron->Output);
       }
-    }//jndex
-  }//index
+    }
+  }//error calculation loop
 
-  //return error sum
-  return utils::scalar_product(Errors,Errors);
+  //update weights
+  for (long Index=0; Index<(long)this->Layers.size(); Index++) {
+    for (long Jndex=0; Jndex<(long)this->Layers[Index].size(); Jndex++) {
+      neuron* Neuron = this->Layers[Index][Jndex];
+
+      for (long Kndex=0; Kndex<(long)Neuron->Weights.size(); Kndex++) {
+        double Weight_Change = 
+        Neuron->Inputs[Kndex]*Neuron->Error*Learning_Rate +
+        Neuron->Weights[Kndex]*Momentum;
+
+        Neuron->Weights[Kndex] += Weight_Change;
+        Neuron->Changes[Kndex]  = Weight_Change;
+      }
+    }
+  }
+
+  return 0;
 }
 
 /**
@@ -236,24 +190,17 @@ void neunet::train_weights(vector<sample> Samples,
 double Learning_Rate,double Momentum){
 
   //loop until error sum is in acceptable range
-  while (true) {
-    double Error_Sum = 0;
+  for (long Index=0; Index<1000; Index++) {
 
     for (long Index=0; Index<(long)Samples.size(); Index++) {
       sample& Sample = Samples[Index];
 
-      this->propagate_forwards(Sample.first);
-      double Error = this->propagate_backwards(
+      this->feedforward(Sample.first);
+      this->backpropagate(
         Sample.second,Learning_Rate,Momentum
       );
-
-      Error_Sum += Error;
     }//for
-
-    //acceptable error sum
-    if (Error_Sum<0.1)
-      break;
-  }//while
+  }
 }
 
 //end of file

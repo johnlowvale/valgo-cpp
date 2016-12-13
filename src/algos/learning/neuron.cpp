@@ -47,7 +47,7 @@ void neuron::set_inputs(vector<double> Inputs) {
  */
 void neuron::randomise_weights() {
   for (long Index=0; Index<(long)this->Weights.size(); Index++)
-    this->Weights[Index] = (utils::random()/2) - 0.25;
+    this->Weights[Index] = utils::random();
 }
 
 /**

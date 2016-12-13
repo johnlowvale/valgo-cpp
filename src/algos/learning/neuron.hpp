@@ -34,6 +34,7 @@ namespace Learning {
       vector<double> Weights;
       vector<double> Changes; //last changes in weights
       double         Output;
+      double         Error;
 
     //public methods
     public:

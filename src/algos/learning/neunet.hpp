@@ -44,8 +44,8 @@ namespace Learning {
 
       void           randomise_weights();
       vector<double> get_layer_outputs(long Layer_Index);
-      vector<double> propagate_forwards(vector<double> Training_Inputs);
-      double         propagate_backwards(vector<double> Expected_Outputs,
+      vector<double> feedforward(vector<double> Training_Inputs);
+      double         backpropagate(vector<double> Expected_Outputs,
                      double Learning_Rate,double Momentum);
       void           train_weights(vector<sample> Samples,
                      double Learning_Rate,double Momentum);
