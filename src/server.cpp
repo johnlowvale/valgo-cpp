@@ -362,21 +362,29 @@ void server::create_indices() {
 void server::test_neunet() {
   cout <<"\nNeunet test..." <<endl;
 
-  //neural network
+  //neural network of 2 layers for logic 'and' operation
+  //inputs: 2 values
+  //first layer: 2 neurons
+  //last layer (second layer): 1 neuron
   neunet Neunet(2,(vector<long>){2,1});
 
   //training data for logic 'and'
   vector<sample> Samples;
-  Samples.push_back(sample{ vd{0,0}, vd{0} });
-  Samples.push_back(sample{ vd{0,1}, vd{0} });
-  Samples.push_back(sample{ vd{1,0}, vd{0} });
-  Samples.push_back(sample{ vd{1,1}, vd{1} });
+  Samples.push_back(sample{ {0,0}, {0} });
+  Samples.push_back(sample{ {0,1}, {0} });
+  Samples.push_back(sample{ {1,0}, {0} });
+  Samples.push_back(sample{ {1,1}, {1} });
 
   //train weights using the above samples
+  double Learning_Rate            = 0.1;
+  double Momentum                 = 0.1;
   double Acceptable_Average_Error = 0.01;
-  long   Set_Iteration_Count      = 
-         Neunet.train_weights(Samples,0.1,0.1,Acceptable_Average_Error);
-  long   Sample_Iteration_Count   = Set_Iteration_Count*Samples.size();
+
+  long Set_Iteration_Count = Neunet.train_weights(
+    Samples,Learning_Rate,Momentum,Acceptable_Average_Error
+  );
+
+  long Sample_Iteration_Count = Set_Iteration_Count*Samples.size();
   cout <<"Acceptable average error:   " <<Acceptable_Average_Error <<endl;
   cout <<"Training set samples:       " <<Samples.size() <<endl;
   cout <<"Training set iterations:    " <<Set_Iteration_Count <<endl;
@@ -385,17 +393,19 @@ void server::test_neunet() {
   //check using training data
   for (long Index=0; Index<(long)Samples.size(); Index++) {
     sample         Sample = Samples[Index];
-    vector<double> Result = Neunet.feedforward(Sample.first);
+    vector<double> Output = Neunet.feedforward(Sample.first);
 
-    //log
-    cout <<Sample.first[0]<<" and "<<Sample.first[1]<<" --> "
-    <<showpos <<fixed <<Result[0] <<noshowpos;
+    //inputs
+    cout <<Sample.first[0]<<" and "<<Sample.first[1]<<" --> ";
+
+    //output (close value)
+    cout <<fixed <<showpos <<Output[0] <<noshowpos;
     cout.unsetf(ios_base::fixed);
-    cout <<" --> " <<(long)round(Result[0]) <<endl;
-  }
 
-  exit(0);
-}
+    //output (rounded value)
+    cout <<" --> " <<(long)round(Output[0]) <<endl;
+  }
+}//test neunet
 
 /**
  * Initialise server
