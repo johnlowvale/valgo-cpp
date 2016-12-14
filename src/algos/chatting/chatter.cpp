@@ -185,12 +185,8 @@ void chatter::add_svo(string Fragment) {
   node     Node2(Object);
   relation Relation(&Node1,&Node2,Verb);
 
-  Node1.add_relation(&Relation);
-  Node2.add_relation(&Relation);
-
   try {
-    Node1.save_to_db(this->Db_Client);
-    Node2.save_to_db(this->Db_Client);
+    Relation.save_to_db(this->Db_Client);
   }
   catch (operation_exception& Exception) {
     utils::print_db_exception(Exception);
@@ -225,11 +221,8 @@ void chatter::add_sv(string Fragment) {
   node     Node2("");
   relation Relation(&Node1,&Node2,Verb);
 
-  Node1.add_relation(&Relation);
-  Node2.add_relation(&Relation);
-
   try {
-    Node1.save_to_db(this->Db_Client);
+    Relation.save_to_db(this->Db_Client);
   }
   catch (operation_exception& Exception) {
     utils::print_db_exception(Exception);
@@ -260,7 +253,7 @@ void chatter::add_compounds(string Fragment) {
     return;
 
   //add compounds
-  for (long Index=0; Index<(long)Tokens.size()-2; Index++) {
+  for (long Index=0; Index<(long)Tokens.size()-1; Index++) {
     string Token1 = Tokens[Index];
     string Token2 = Tokens[Index+1];
 
@@ -269,7 +262,7 @@ void chatter::add_compounds(string Fragment) {
     relation Relation(&Node1,&Node2,string("-"));
 
     try {
-      Node1.save_to_db(this->Db_Client);
+      Relation.save_to_db(this->Db_Client);
     }
     catch (operation_exception& Exception) {
       utils::print_db_exception(Exception);

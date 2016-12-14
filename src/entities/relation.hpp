@@ -13,7 +13,12 @@
 //standard c++ headers
 #include <string>
 
+//library headers
+#include <bsoncxx/json.hpp>
+#include <mongocxx/client.hpp>
+
 //in-project headers
+#include <types.hpp>
 #include <entities/node.hpp>
 
 //standard c++ namespaces being used
@@ -36,15 +41,17 @@ namespace Entities {
 
     //public properties
     public:
-      string Id;
+      string Id;    //left+name+right
       node*  Left;  //eg. galaxy-note-3
       node*  Right; //eg. samsung
       string Name;  //eg. is-created-by, is-a-child-of,...
 
     //public constructor and methods
     public:
-      relation(node* Left,node* Right,string Id);
+      relation(node* Left,node* Right,string Name);
       ~relation();
+
+      void save_to_db(client& Db_Client);
   };
 }//namespace path
 

@@ -57,26 +57,6 @@ void node::save_to_db(client& Db_Client) {
   <<"Id"      <<this->Id
   <<"Content" <<"";
 
-  //relations array
-  auto Array = Document <<"Relations" <<open_array;
-
-  //loop thru all relations
-  for (relation* Relation: this->Relations) {
-
-    //relation is directed relation from left to right
-    //no the other way round
-    if (Relation->Left->Id==this->Id) {
-      Array
-      <<open_document
-        <<"Relation" <<Relation->Id
-        <<"Node"     <<Relation->Right->Id
-      <<close_document;
-    }//if
-  }//for
-
-  //close array
-  Array <<close_array;
-
   db::insert_one(Db_Client,"nodes",Document);
 }
 
