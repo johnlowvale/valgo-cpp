@@ -14,7 +14,11 @@
 #include <string>
 #include <vector>
 
+//library headers
+#include <mongocxx/client.hpp>
+
 //in-project headers
+#include <types.hpp>
 #include <entities/content.hpp>
 
 //standard c++ namespaces being used
@@ -42,8 +46,11 @@ namespace Entities {
 
     //public constructor and methods
     public:
-      node();
+      node(string Id);
       ~node();
+
+      void add_relation(relation* Relation);
+      void save_to_db(client& Db_Client);
   };
 }//namespace path
 

@@ -26,7 +26,8 @@ using namespace Entities;
 namespace Entities {
 
   /**
-   * Node relation class
+   * Node relation class 
+   * (directed relation left to right, no the other way round)
    * eg.
    * 'galaxy-note-3' -- 'is-created-by' -- 'samsung'
    * 'samsung' -- 'creates' -- 'galaxy-note-3'
@@ -42,7 +43,7 @@ namespace Entities {
 
     //public constructor and methods
     public:
-      relation();
+      relation(node* Left,node* Right,string Id);
       ~relation();
   };
 }//namespace path

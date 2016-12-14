@@ -28,12 +28,15 @@
 #include <mongocxx/cursor.hpp>
 #include <mongocxx/stdx.hpp>
 #include <mongocxx/uri.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
 
 //in-project headers
 #include <consts.hpp>
 #include <types.hpp>
 #include <algos/learning/neunet.hpp>
 #include <algos/chatting/chatter.hpp>
+#include <entities/node.hpp>
+#include <entities/relation.hpp>
 #include <miscs/db.hpp>
 #include <miscs/utils.hpp>
 
@@ -46,6 +49,8 @@ using namespace htmlcxx;
 using namespace htmlcxx::HTML;
 using namespace mongocxx;
 using namespace mongocxx::result;
+using bsoncxx::from_json;
+using bsoncxx::to_json;
 
 //standard namespaces
 using namespace std;
@@ -53,6 +58,7 @@ using namespace std;
 //in-project namespaces being used
 using namespace Algos::Chatting;
 using namespace Algos::Learning;
+using namespace Entities;
 using namespace Miscs;
 
 //static properties
@@ -151,6 +157,49 @@ string chatter::get_reply_for_text(string Text) {
  * Add relations for subject-verb-object
  */
 void chatter::add_svo(string Fragment) {
+  vector<string> Tokens;
+  split(Tokens,Fragment,is_any_of(">"));
+
+  //get values
+  string Subject = Tokens[0];
+  string Verb    = Tokens[1];
+  string Object  = Tokens[2];
+  trim(Subject);
+  trim(Verb);
+  trim(Object);
+
+  //skip if there is any empty value
+  if (Subject.length()==0 || Verb.length()==0 || Object.length()==0)
+    return;
+
+  //format values
+  to_lower(Subject);
+  to_lower(Verb);
+  to_lower(Object);
+  Subject = utils::tidy_up(Subject);
+  Verb    = utils::tidy_up(Verb);
+  Object  = utils::tidy_up(Object);
+
+  //create nodes & relation
+  node     Node1(Subject);
+  node     Node2(Object);
+  relation Relation(&Node1,&Node2,Verb);
+
+  Node1.add_relation(&Relation);
+  Node2.add_relation(&Relation);
+
+  try {
+    Node1.save_to_db(this->Db_Client);
+    Node2.save_to_db(this->Db_Client);
+    //Relation.save_to_db();
+  }
+  catch (operation_exception& Exception) {
+    stringstream Out;
+    Out <<"Exception:" <<endl;
+    Out <<to_json(Exception.raw_server_error().value()) <<endl;
+    cout <<Out.str();
+    cout.flush();
+  }
 }
 
 /**

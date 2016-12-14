@@ -20,6 +20,7 @@
 
 //library headers
 #include <boost/filesystem.hpp>
+#include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <bsoncxx/types.hpp>
@@ -271,6 +272,17 @@ double utils::random() {
   uniform_real_distribution<> Distribution(0,1);
 
   return Distribution(Generator);
+}
+
+/**
+ * Tidy up a string by removing duplicated space characters
+ */
+string utils::tidy_up(string Str) {
+  while (Str.find("  ")!=string::npos) //2 spaces
+    replace_all(Str,"  "," "); //replace 2 spaces to 1 space
+
+  trim(Str);
+  return Str;
 }
 
 /**
