@@ -244,7 +244,7 @@ string chatter::get_reply_for_sentence(string Sentence) {
     string         Component = Components[Index];
     vector<string> Terms     = this->get_terms_in_component(Component);
 
-    //???
+    //??? ???
     for (long Jndex=0; Jndex<(long)Terms.size(); Jndex++)
       if (Jndex==0)
         Reply += Terms[Jndex];
