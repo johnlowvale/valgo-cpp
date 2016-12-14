@@ -191,7 +191,6 @@ void chatter::add_svo(string Fragment) {
   try {
     Node1.save_to_db(this->Db_Client);
     Node2.save_to_db(this->Db_Client);
-    //Relation.save_to_db();
   }
   catch (operation_exception& Exception) {
     stringstream Out;
@@ -206,6 +205,43 @@ void chatter::add_svo(string Fragment) {
  * Add relations for subject-verb
  */
 void chatter::add_sv(string Fragment) {
+  vector<string> Tokens;
+  split(Tokens,Fragment,is_any_of(">"));
+
+  //get values
+  string Subject = Tokens[0];
+  string Verb    = Tokens[1];
+  trim(Subject);
+  trim(Verb);
+
+  //skip if there is any empty value
+  if (Subject.length()==0 || Verb.length()==0)
+    return;
+
+  //format values
+  to_lower(Subject);
+  to_lower(Verb);
+  Subject = utils::tidy_up(Subject);
+  Verb    = utils::tidy_up(Verb);
+
+  //create nodes & relation
+  node     Node1(Subject);
+  node     Node2("");
+  relation Relation(&Node1,&Node2,Verb);
+
+  Node1.add_relation(&Relation);
+  Node2.add_relation(&Relation);
+
+  try {
+    Node1.save_to_db(this->Db_Client);
+  }
+  catch (operation_exception& Exception) {
+    stringstream Out;
+    Out <<"Exception:" <<endl;
+    Out <<to_json(Exception.raw_server_error().value()) <<endl;
+    cout <<Out.str();
+    cout.flush();
+  }
 }
 
 /**
