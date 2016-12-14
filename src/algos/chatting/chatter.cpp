@@ -193,11 +193,7 @@ void chatter::add_svo(string Fragment) {
     Node2.save_to_db(this->Db_Client);
   }
   catch (operation_exception& Exception) {
-    stringstream Out;
-    Out <<"Exception:" <<endl;
-    Out <<to_json(Exception.raw_server_error().value()) <<endl;
-    cout <<Out.str();
-    cout.flush();
+    utils::print_db_exception(Exception);
   }
 }
 
@@ -236,11 +232,7 @@ void chatter::add_sv(string Fragment) {
     Node1.save_to_db(this->Db_Client);
   }
   catch (operation_exception& Exception) {
-    stringstream Out;
-    Out <<"Exception:" <<endl;
-    Out <<to_json(Exception.raw_server_error().value()) <<endl;
-    cout <<Out.str();
-    cout.flush();
+    utils::print_db_exception(Exception);
   }
 }
 
@@ -248,6 +240,41 @@ void chatter::add_sv(string Fragment) {
  * Add relations for terms in compounds
  */
 void chatter::add_compounds(string Fragment) {
+  vector<string> Temps;
+  split(Temps,Fragment,is_any_of("+"));
+
+  //remove empty tokens
+  vector<string> Tokens;
+  for (string Temp: Temps) {
+    trim(Temp);
+
+    if (Temp.length()>0) {
+      to_lower(Temp);
+      Temp = utils::tidy_up(Temp);
+      Tokens.push_back(Temp);
+    }
+  }//for
+
+  //compound needs at least 2 terms
+  if (Tokens.size()<2)
+    return;
+
+  //add compounds
+  for (long Index=0; Index<(long)Tokens.size()-2; Index++) {
+    string Token1 = Tokens[Index];
+    string Token2 = Tokens[Index+1];
+
+    node     Node1(Token1);
+    node     Node2(Token2);
+    relation Relation(&Node1,&Node2,string("-"));
+
+    try {
+      Node1.save_to_db(this->Db_Client);
+    }
+    catch (operation_exception& Exception) {
+      utils::print_db_exception(Exception);
+    }
+  }//for
 }
 
 /**

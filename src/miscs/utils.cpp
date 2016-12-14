@@ -23,7 +23,9 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <bsoncxx/json.hpp>
 #include <bsoncxx/types.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
 #include <uriparser/Uri.h>
 
 //in-project headers
@@ -37,6 +39,9 @@ using namespace std::chrono;
 //library namespaces
 using namespace boost;
 using namespace boost::property_tree;
+using namespace mongocxx;
+using bsoncxx::from_json;
+using bsoncxx::to_json;
 using bsoncxx::types::b_date;
 
 //in-project namespaces
@@ -236,6 +241,18 @@ int64 utils::milliseconds_since_epoch() {
          count();
 }
 
+/**
+ * Print mongodb exception
+ */
+void utils::print_db_exception(operation_exception& Exception) {
+  stringstream Out;
+
+  Out <<"\nException:" <<endl;
+  Out <<to_json(Exception.raw_server_error().value()) <<endl;
+
+  cout <<Out.str();
+  cout.flush();
+}
 
 /**
  * Print and flush

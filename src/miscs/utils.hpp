@@ -19,6 +19,7 @@
 #include <client_http.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <bsoncxx/types.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
 #include <uriparser/Uri.h>
 
 //in-project headers
@@ -31,6 +32,7 @@ using namespace std;
 //library namespaces being used
 using namespace boost;
 using namespace boost::property_tree;
+using namespace mongocxx;
 using namespace SimpleWeb;
 using bsoncxx::types::b_date;
 
@@ -65,6 +67,7 @@ namespace Miscs {
       static moment now();
       static long   get_timezone_offset();
       static int64  milliseconds_since_epoch();
+      static void   print_db_exception(operation_exception& Exception);
 
       //http request and response related
       static string get_request_header(request Request,const char* Header);
