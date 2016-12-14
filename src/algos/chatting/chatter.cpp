@@ -55,18 +55,28 @@ using namespace Algos::Chatting;
 using namespace Algos::Learning;
 using namespace Miscs;
 
+//static properties
+string chatter::INFORMATION_SUPPORT = "INFORMATION_SUPPORT";
+
 /**
  * Can't assign new object in constructor, using constructor initialiser
  */
 chatter::chatter(client& Db_Client_,request& Request_,response& Response_):
 Db_Client(Db_Client_),Request(Request_),Response(Response_) {
-  //
+  this->Motivation = chatter::INFORMATION_SUPPORT;
 }
 
 /**
  * Default destructor
  */
 chatter::~chatter() {
+}
+
+/**
+ * Check if a reply is for the current motivation
+ */
+bool chatter::is_reply_for_motivation(string Reply) {
+  return true;
 }
 
 /**

@@ -28,11 +28,19 @@ namespace Chatting {
    */
   class chatter {
 
+    //constants
+    public:
+      static string INFORMATION_SUPPORT;
+
     //public reference properties
     public:
       client&   Db_Client;
       request&  Request;
       response& Response;
+
+    //public properties
+    public:
+      string Motivation;
 
     //public constructor, destructor and methods
     public:
@@ -40,6 +48,7 @@ namespace Chatting {
       ~chatter();
 
       //thread method
+      bool is_reply_for_motivation(string Reply);
       void run();
   };
 
