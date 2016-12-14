@@ -53,6 +53,7 @@ void node::add_relation(relation* Relation) {
 void node::save_to_db(client& Db_Client) {
   document Document;
   Document 
+  <<"_id"     <<this->Id
   <<"Id"      <<this->Id
   <<"Content" <<"";
 
