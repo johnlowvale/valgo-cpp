@@ -204,7 +204,8 @@ vector<string> chatter::get_terms_in_component(string Component) {
     //no possible combinations of tokens to make a known term
     if (Index==(long)Tokens.size()) {
       Terms.push_back(this->what()+"?");
-      break;
+      Tokens.erase(Tokens.begin());
+      continue;
     }
 
     //add the found term to list
