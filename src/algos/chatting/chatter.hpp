@@ -10,6 +10,10 @@
 #ifndef ALGOS_CHATTING_CHATTER_HPP
 #define ALGOS_CHATTING_CHATTER_HPP
 
+//standard c++ headers
+#include <map>
+#include <vector>
+
 //library headers
 #include <mongocxx/client.hpp>
 
@@ -30,7 +34,9 @@ namespace Chatting {
 
     //constants
     public:
-      static string INFORMATION_SUPPORT;
+      static string            INFORMATION_SUPPORT;
+      static map<string,mapss> REFLECTS; //term reflection, eg. I-->you
+      static map<string,mapss> WHATS; //used when a term is not understood
 
     //public reference properties
     public:
@@ -41,6 +47,7 @@ namespace Chatting {
     //public properties
     public:
       string Motivation;
+      string Language;
 
     //public constructor, destructor and methods
     public:
@@ -50,9 +57,13 @@ namespace Chatting {
       //thread methods
       bool           is_reply_for_motivation(string Reply);
       vector<string> split_text_into_sentences(string Text);
+      string         tokens_to_term(vector<string> Tokens,long To_Before);
+      bool           term_is_in_db(string Term);
       vector<string> get_terms_in_component(string Component);
       string         get_reply_for_sentence(string Sentence);
       string         get_reply_for_text(string Text);
+      string         check_reflection(string Token);
+      string         what();
       void           add_svo(string Fragment);
       void           add_sv(string Fragment);
       void           add_compounds(string Fragment);

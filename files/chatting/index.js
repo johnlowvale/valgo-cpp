@@ -44,7 +44,8 @@ function send_text(event) {
 
   //send to server
   $.post("http://"+location.host+"/chat",JSON.stringify({
-    Text: Text
+    Text:     Text,
+    Language: "English"
   })).
   done(function(Data){
     append_chatlog("Chatbot",Data.Reply,"black");

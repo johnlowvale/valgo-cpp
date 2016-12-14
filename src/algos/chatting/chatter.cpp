@@ -64,6 +64,26 @@ using namespace Miscs;
 //static properties
 string chatter::INFORMATION_SUPPORT = "INFORMATION_SUPPORT";
 
+map<string,mapss> chatter::REFLECTS = {
+  {"English",{
+    {"i",        "you"},
+    {"me",       "you"},    
+    {"my",       "your"},
+    {"mine",     "yours"},
+    {"myself",   "yourself"},
+    {"you",      "me"},
+    {"your",     "my"},
+    {"yours",    "mine"},
+    {"yourself", "myself"}
+  }}
+};
+
+map<string,mapss> chatter::WHATS = {
+  {"English",{
+    {"what", "what"}
+  }}
+};
+
 /**
  * Can't assign new object in constructor, using constructor initialiser
  */
@@ -99,13 +119,103 @@ vector<string> chatter::split_text_into_sentences(string Text) {
 }
 
 /**
+ * Join a list of tokens to make a term
+ * @param Tokens    List of tokens (words or syllables)
+ * @param To_Before Join tokens to before this index in Tokens vector
+ */
+string chatter::tokens_to_term(vector<string> Tokens,long To_Before) {
+  string Term("");
+
+  for (long Index=0; Index<To_Before; Index++)
+    if (Index==0)
+      Term += Tokens[Index];
+    else
+      Term += " "+Tokens[Index];
+
+  return Term;
+}
+
+/**
+ * Check if a term is in db
+ */
+bool chatter::term_is_in_db(string Term) {
+
+  //check left side of relation
+  value Find_Val = document{}
+  <<"Left" <<Term
+  <<finalize;
+
+  long Count = db::count(this->Db_Client,"relations",Find_Val,1);
+  if (Count==1)
+    return true;
+
+  //check name of relation
+  Find_Val = document{}
+  <<"Name" <<Term
+  <<finalize;
+
+  Count = db::count(this->Db_Client,"relations",Find_Val,1);
+  if (Count==1)
+    return true;
+
+  //check right side of relation
+  Find_Val = document{}
+  <<"Right" <<Term
+  <<finalize;
+
+  Count = db::count(this->Db_Client,"relations",Find_Val,1);
+  if (Count==1)
+    return true;
+
+  //not found in db
+  return false;
+}
+
+/**
  * Parse to get terms in a sentence component
  * A term may contain multiple words, eg. AO Smith
+ * A term is a node in database
  */
 vector<string> chatter::get_terms_in_component(string Component) {
 
-  //???
-  return vector<string>{};
+  //format the sentence component
+  to_lower(Component);
+  Component = utils::tidy_up(Component);
+
+  //get the tokens (words or syllables) in the sentence component
+  vector<string> Tokens;
+  split(Tokens,Component,is_any_of(" "));
+
+  //create list of terms from tokens
+  vector<string> Terms;
+  while (Tokens.size()>0) {
+
+    //try to make a term with fewest tokens
+    string Term;
+    long   Index;
+    for (Index=0; Index<(long)Tokens.size(); Index++) {
+      Term = this->tokens_to_term(Tokens,Index+1);
+      
+      //term found in db
+      if (this->term_is_in_db(Term)) 
+        break;
+    }
+
+    //no possible combinations of tokens to make a known term
+    if (Index==(long)Tokens.size()) {
+      Terms.push_back(this->what()+"?");
+      break;
+    }
+
+    //add the found term to list
+    Terms.push_back(Term);
+
+    //remove the componential tokens
+    for (long Jndex=0; Jndex<Index+1; Jndex++)
+      Tokens.erase(Tokens.begin());
+  }//while
+
+  return Terms;
 }
 
 /**
@@ -119,6 +229,7 @@ string chatter::get_reply_for_sentence(string Sentence) {
   vector<string> Temps;
   split(Temps,Sentence,is_any_of(","));
 
+  //each component is a phrase or clause (svo, sv)
   vector<string> Components;
   for (string Item: Temps) {
     trim(Item);
@@ -126,8 +237,22 @@ string chatter::get_reply_for_sentence(string Sentence) {
       Components.push_back(Item);
   }
 
-  //???
-  return string("x.");
+  //make reply
+  string Reply("");
+  for (long Index=0; Index<(long)Components.size(); Index++) {
+    string         Component = Components[Index];
+    vector<string> Terms     = this->get_terms_in_component(Component);
+
+    for (long Jndex=0; Jndex<(long)Terms.size(); Jndex++)
+      if (Jndex==0)
+        Reply += Terms[Jndex];
+      else
+        Reply += "+"+Terms[Jndex];
+
+    Reply += "; ";
+  }
+
+  return Reply;
 }
 
 /**
@@ -151,6 +276,25 @@ string chatter::get_reply_for_text(string Text) {
   }
 
   return Full_Reply;
+}
+
+/**
+ * Check term reflection, eg. i->you, you->i
+ */
+string chatter::check_reflection(string Term) {
+  mapss Reflects = chatter::REFLECTS[this->Language];
+
+  if (Reflects.count(Term)==1)
+    return Reflects[Term];
+  else 
+    return Term;
+}
+
+/**
+ * Word used when a term is not understood
+ */
+string chatter::what() {
+  return chatter::WHATS[this->Language]["what"];
 }
 
 /**
@@ -179,6 +323,8 @@ void chatter::add_svo(string Fragment) {
   Subject = utils::tidy_up(Subject);
   Verb    = utils::tidy_up(Verb);
   Object  = utils::tidy_up(Object);
+  Subject = this->check_reflection(Subject);
+  Object  = this->check_reflection(Object);
 
   //create nodes & relation
   node     Node1(Subject);
@@ -229,6 +375,7 @@ void chatter::add_sv(string Fragment) {
   to_lower(Verb);
   Subject = utils::tidy_up(Subject);
   Verb    = utils::tidy_up(Verb);
+  Subject = this->check_reflection(Subject);
 
   //create nodes & relation
   node     Node1(Subject);
@@ -277,6 +424,8 @@ void chatter::add_compounds(string Fragment) {
   for (long Index=0; Index<(long)Tokens.size()-1; Index++) {
     string Token1 = Tokens[Index];
     string Token2 = Tokens[Index+1];
+    Token1 = this->check_reflection(Token1);
+    Token2 = this->check_reflection(Token2);
 
     node     Node1(Token1);
     node     Node2(Token2);
@@ -331,7 +480,10 @@ void chatter::add_terms(string Fragment) {
   //add nodes
   for (long Index=0; Index<(long)Tokens.size(); Index++) {
     string Token = Tokens[Index];
-    node   Node(Token);
+
+    //create node instance
+    Token = this->check_reflection(Token);
+    node Node(Token);
 
     try {
       Node.save_to_db(this->Db_Client);
@@ -391,9 +543,13 @@ void chatter::run() {
   utils::print_request(Request);
 
   //get request data
-  ptree  Content = utils::get_request_content_ptree(Request);
-  string Text    = Content.get<string>("Text");
+  ptree  Content  = utils::get_request_content_ptree(Request);
+  string Text     = Content.get<string>("Text");
+  string Language = Content.get<string>("Language");
   cout <<"\nA human said " <<Text <<endl;
+
+  //config
+  this->Language = Language;
 
   //result
   ptree Result;

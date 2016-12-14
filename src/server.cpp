@@ -372,10 +372,11 @@ void server::create_indices() {
   })");  
 
   //relations
-  cout <<"relations.Left+Name" <<endl;
-  db::create_index(this->Db_Client,"relations","Left_And_Name",R"({
-    "Left": 1,
-    "Name": 1
+  cout <<"relations.Left+Name+Right" <<endl;
+  db::create_index(this->Db_Client,"relations","Left_Name_Right",R"({
+    "Left":  1,
+    "Name":  1,
+    "Right": 1
   })");
 
   cout <<"Indices created." <<endl <<endl;
