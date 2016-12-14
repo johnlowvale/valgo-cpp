@@ -186,6 +186,20 @@ void chatter::add_svo(string Fragment) {
   relation Relation(&Node1,&Node2,Verb);
 
   try {
+    Node1.save_to_db(this->Db_Client);
+  }
+  catch (operation_exception& Exception) {
+    utils::print_db_exception(Exception);
+  }
+
+  try {
+    Node2.save_to_db(this->Db_Client);
+  }
+  catch (operation_exception& Exception) {
+    utils::print_db_exception(Exception);
+  }
+
+  try {
     Relation.save_to_db(this->Db_Client);
   }
   catch (operation_exception& Exception) {
@@ -220,6 +234,13 @@ void chatter::add_sv(string Fragment) {
   node     Node1(Subject);
   node     Node2("");
   relation Relation(&Node1,&Node2,Verb);
+
+  try {
+    Node1.save_to_db(this->Db_Client);
+  }
+  catch (operation_exception& Exception) {
+    utils::print_db_exception(Exception);
+  }
 
   try {
     Relation.save_to_db(this->Db_Client);
@@ -262,6 +283,20 @@ void chatter::add_compounds(string Fragment) {
     relation Relation(&Node1,&Node2,string("-"));
 
     try {
+      Node1.save_to_db(this->Db_Client);
+    }
+    catch (operation_exception& Exception) {
+      utils::print_db_exception(Exception);
+    }
+
+    try {
+      Node2.save_to_db(this->Db_Client);
+    }
+    catch (operation_exception& Exception) {
+      utils::print_db_exception(Exception);
+    }
+
+    try {
       Relation.save_to_db(this->Db_Client);
     }
     catch (operation_exception& Exception) {
@@ -274,6 +309,37 @@ void chatter::add_compounds(string Fragment) {
  * Add terms
  */
 void chatter::add_terms(string Fragment) {
+  vector<string> Temps;
+  split(Temps,Fragment,is_any_of(","));
+
+  //remove empty tokens
+  vector<string> Tokens;
+  for (string Temp: Temps) {
+    trim(Temp);
+
+    if (Temp.length()>0) {
+      to_lower(Temp);
+      Temp = utils::tidy_up(Temp);
+      Tokens.push_back(Temp);
+    }
+  }//for
+
+  //nothing to save
+  if (Tokens.size()<1)
+    return;
+
+  //add nodes
+  for (long Index=0; Index<(long)Tokens.size(); Index++) {
+    string Token = Tokens[Index];
+    node   Node(Token);
+
+    try {
+      Node.save_to_db(this->Db_Client);
+    }
+    catch (operation_exception& Exception) {
+      utils::print_db_exception(Exception);
+    }
+  }//for
 }
 
 /**
