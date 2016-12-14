@@ -80,6 +80,140 @@ bool chatter::is_reply_for_motivation(string Reply) {
 }
 
 /**
+ * Split text into sentences based on sentence punctuations
+ */
+vector<string> chatter::split_text_into_sentences(string Text) {
+  replace_all(Text,"!",".");
+  replace_all(Text,"?",".");
+
+  vector<string> Sentences;
+  split(Sentences,Text,is_any_of("."));
+
+  return Sentences;
+}
+
+/**
+ * Parse to get terms in a sentence component
+ * A term may contain multiple words, eg. AO Smith
+ */
+vector<string> chatter::get_terms_in_component(string Component) {
+
+  //???
+  return vector<string>{};
+}
+
+/**
+ * Get reply for a sentence
+ */
+string chatter::get_reply_for_sentence(string Sentence) {
+  replace_all(Sentence,":",",");
+  replace_all(Sentence,";",",");
+
+  //split sentence into phrases and clauses
+  vector<string> Temps;
+  split(Temps,Sentence,is_any_of(","));
+
+  vector<string> Components;
+  for (string Item: Temps) {
+    trim(Item);
+    if (Item.length()>0)
+      Components.push_back(Item);
+  }
+
+  //???
+  return string("x.");
+}
+
+/**
+ * Get a reply for an input text
+ */
+string chatter::get_reply_for_text(string Text) {
+  vector<string> Sentences = this->split_text_into_sentences(Text);
+  string         Full_Reply;
+
+  //loop thru' all sentences to get replies
+  for (string Sentence: Sentences) {
+    trim(Sentence);
+
+    //skip empty sentence
+    if (Sentence.length()==0)
+      continue;
+
+    //get reply
+    string Reply = this->get_reply_for_sentence(Sentence);
+    Full_Reply  += " "+Reply;
+  }
+
+  return Full_Reply;
+}
+
+/**
+ * Add relations for subject-verb-object
+ */
+void chatter::add_svo(string Fragment) {
+}
+
+/**
+ * Add relations for subject-verb
+ */
+void chatter::add_sv(string Fragment) {
+}
+
+/**
+ * Add relations for terms in compounds
+ */
+void chatter::add_compounds(string Fragment) {
+}
+
+/**
+ * Add terms
+ */
+void chatter::add_terms(string Fragment) {
+}
+
+/**
+ * Add terms and relations to db
+ */
+void chatter::add_terms_and_relations(string Text) {
+  Text = Text.substr(5);
+
+  //split text into knowledge fragments, fragments are separated by ';'
+  //term list:           term,term,term,...
+  //compound list:       term+term+term+...
+  //subject-verb:        term>term
+  //subject-verb-object: term>term>term
+  vector<string> Fragments;
+  split(Fragments,Text,is_any_of(";"));
+
+  //parse each fragment
+  for (string Fragment: Fragments) {
+    trim(Fragment);
+    long Greaterthan_Count = count(Fragment.begin(),Fragment.end(),'>');
+    long Plus_Count        = count(Fragment.begin(),Fragment.end(),'+');
+    long Comma_Count       = count(Fragment.begin(),Fragment.end(),',');
+
+    //skip bad fragment
+    if (Greaterthan_Count>2)
+      continue;
+
+    //svo
+    if (Greaterthan_Count==2)
+      this->add_svo(Fragment);
+    else
+    if (Greaterthan_Count==1)
+      this->add_sv(Fragment);
+    else
+    if (Plus_Count>0)
+      this->add_compounds(Fragment);
+    else
+    if (Comma_Count>0)
+      this->add_terms(Fragment);
+    else
+      this->add_terms(Fragment);
+  }//for
+}
+
+/**
  * Chatter thread (for only a single reply)
  */
 void chatter::run() {
@@ -92,7 +226,12 @@ void chatter::run() {
 
   //result
   ptree Result;
-  Result.put("Reply","I'm chatbot");
+  if (Text.substr(0,5)==string("/add")+" ") { //the space is important
+    this->add_terms_and_relations(Text);
+    Result.put("Reply","Added terms and relations!");
+  }
+  else
+    Result.put("Reply",this->get_reply_for_text(Text));
 
   //respond
   string Json_Str = utils::dump_to_json_str(Result);

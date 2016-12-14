@@ -47,9 +47,18 @@ namespace Chatting {
       chatter(client& Db_Client_,request& Request_,response& Response_);
       ~chatter();
 
-      //thread method
-      bool is_reply_for_motivation(string Reply);
-      void run();
+      //thread methods
+      bool           is_reply_for_motivation(string Reply);
+      vector<string> split_text_into_sentences(string Text);
+      vector<string> get_terms_in_component(string Component);
+      string         get_reply_for_sentence(string Sentence);
+      string         get_reply_for_text(string Text);
+      void           add_svo(string Fragment);
+      void           add_sv(string Fragment);
+      void           add_compounds(string Fragment);
+      void           add_terms(string Fragment);
+      void           add_terms_and_relations(string Text);
+      void           run();
   };
 
 //namespace path
