@@ -65,6 +65,7 @@ namespace Chatting {
       string         tokens_to_term(vector<string> Tokens,long To_Before);
       bool           term_is_in_db(string Term);
       vector<string> get_terms_in_component(string Component);
+      string         find_most_concerned_term(vector<string> Terms);
       string         get_reply_for_sentence(string Sentence);
       string         get_reply_for_text(string Text);
       string         check_reflection(string Token,string Type);

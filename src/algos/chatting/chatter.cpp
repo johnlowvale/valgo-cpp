@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <iostream>
+#include <limits>
 #include <vector>
 
 //libary headers
@@ -249,6 +250,39 @@ vector<string> chatter::get_terms_in_component(string Component) {
 }
 
 /**
+ * Find most concerned term of this chatbot
+ */
+string chatter::find_most_concerned_term(vector<string> Terms) {
+  double Lowest         = numeric_limits<double>::lowest();
+  double Max_Importance = Lowest;
+  string Most_Concerned_Term("");
+
+  //loop thru' all terms
+  for (string Term: Terms) {
+    node    Node(Term,this->Language);
+    concern Concern(this->Name,&Node,0);
+
+    //skip term which is not concerned
+    if (!Concern.exists(this->Db_Client))
+      continue;
+
+    //get data of concerned term
+    Concern.load_by_id(this->Db_Client);
+
+    //more important?
+    if (Concern.Importance>Max_Importance) {
+      Max_Importance      = Concern.Importance;
+      Most_Concerned_Term = Concern.Node->Id;
+    }
+  }//term loop
+
+  if (Max_Importance==Lowest)
+    return this->what();
+  else
+    return Most_Concerned_Term;
+}
+
+/**
  * Get reply for a sentence
  */
 string chatter::get_reply_for_sentence(string Sentence) {
@@ -268,22 +302,21 @@ string chatter::get_reply_for_sentence(string Sentence) {
   }
 
   //make reply
-  string Reply("");
+  string         Reply("");
+  vector<string> All_Terms;
   for (long Index=0; Index<(long)Components.size(); Index++) {
     string         Component = Components[Index];
     vector<string> Terms     = this->get_terms_in_component(Component);
 
-    //??? ???
+    //add terms in component to All_Terms
     for (long Jndex=0; Jndex<(long)Terms.size(); Jndex++)
-      if (Jndex==0)
-        Reply += Terms[Jndex];
-      else
-        Reply += " "+Terms[Jndex];
-
-    Reply += ". ";
+      All_Terms.push_back(Terms[Jndex]);
   }
 
-  return Reply;
+  //find most concerned term
+  string Concerned_Term = this->find_most_concerned_term(All_Terms);
+
+  return Concerned_Term;
 }
 
 /**
