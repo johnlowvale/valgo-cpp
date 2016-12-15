@@ -336,7 +336,7 @@ string chatter::what() {
  */
 void chatter::add_svo(string Fragment) {
   vector<string> Tokens;
-  split(Tokens,Fragment,is_any_of(">"));
+  split(Tokens,Fragment,is_any_of("/"));
 
   //get values
   string Subject = Tokens[0];
@@ -398,7 +398,7 @@ void chatter::add_svo(string Fragment) {
  */
 void chatter::add_sv(string Fragment) {
   vector<string> Tokens;
-  split(Tokens,Fragment,is_any_of(">"));
+  split(Tokens,Fragment,is_any_of("/"));
 
   //get values
   string Subject = Tokens[0];
@@ -557,19 +557,19 @@ void chatter::add_terms_and_relations(string Text) {
   //parse each fragment
   for (string Fragment: Fragments) {
     trim(Fragment);
-    long Greaterthan_Count = count(Fragment.begin(),Fragment.end(),'>');
-    long Plus_Count        = count(Fragment.begin(),Fragment.end(),'+');
-    long Comma_Count       = count(Fragment.begin(),Fragment.end(),',');
+    long Slash_Count = count(Fragment.begin(),Fragment.end(),'/');
+    long Plus_Count  = count(Fragment.begin(),Fragment.end(),'+');
+    long Comma_Count = count(Fragment.begin(),Fragment.end(),',');
 
     //skip bad fragment
-    if (Greaterthan_Count>2)
+    if (Slash_Count>2)
       continue;
 
     //svo
-    if (Greaterthan_Count==2)
+    if (Slash_Count==2)
       this->add_svo(Fragment);
     else
-    if (Greaterthan_Count==1)
+    if (Slash_Count==1)
       this->add_sv(Fragment);
     else
     if (Plus_Count>0)
