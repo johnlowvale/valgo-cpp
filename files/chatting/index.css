@@ -12,6 +12,14 @@
   margin:0; padding:10px; border-radius:5px;
 }
 
+#Chat-Title {
+  float:left; line-height:20px; cursor:pointer; margin-left:2px;
+}
+
+#Chat-Title a {
+  text-decoration:none; color:black; font-family:arial;
+}
+
 #Chat-Close {
   float:right; line-height:20px; cursor:pointer;
 }
