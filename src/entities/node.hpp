@@ -41,12 +41,13 @@ namespace Entities {
     //public properties
     public:
       string            Id;
+      string            Language;
       content*          Content;
       vector<relation*> Relations;
 
     //public constructor and methods
     public:
-      node(string Id);
+      node(string Id,string Language);
       ~node();
 
       void add_relation(relation* Relation);

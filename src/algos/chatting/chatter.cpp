@@ -66,23 +66,29 @@ string chatter::INFORMATION_SUPPORT = "INFORMATION_SUPPORT";
 
 map<string,mapss> chatter::REFLECTS = {
   {"English",{
-    {"i",        "you"},
-    {"me",       "you"},    
-    {"my",       "your"},
-    {"mine",     "yours"},
-    {"myself",   "yourself"},
-    {"you",      "me"},
-    {"your",     "my"},
-    {"yours",    "mine"},
-    {"yourself", "myself"}
+    {"i",           "you"},
+    {"me",          "you"},    
+    {"my",          "your"},
+    {"mine",        "yours"},
+    {"myself",      "yourself"},
+    {"you-subject", "i"},
+    {"you-object",  "me"},
+    {"your",        "my"},
+    {"yours",       "mine"},
+    {"yourself",    "myself"}
   }}
 };
 
 map<string,mapss> chatter::WHATS = {
   {"English",{
-    {"what", "what"}
+    {"what", "what?"}
   }}
 };
+
+string chatter::SUBJECT  = "subject";
+string chatter::RELATION = "relation";
+string chatter::OBJECT   = "object";
+string chatter::TERM     = "term";
 
 /**
  * Can't assign new object in constructor, using constructor initialiser
@@ -126,11 +132,14 @@ vector<string> chatter::split_text_into_sentences(string Text) {
 string chatter::tokens_to_term(vector<string> Tokens,long To_Before) {
   string Term("");
 
-  for (long Index=0; Index<To_Before; Index++)
+  for (long Index=0; Index<To_Before; Index++) {
+    string Token = this->check_reflection(Tokens[Index],chatter::TERM);
+
     if (Index==0)
-      Term += Tokens[Index];
+      Term += Token;
     else
-      Term += " "+Tokens[Index];
+      Term += " "+Token;
+  }
 
   return Term;
 }
@@ -142,7 +151,8 @@ bool chatter::term_is_in_db(string Term) {
 
   //check left side of relation
   value Find_Val = document{}
-  <<"Left" <<Term
+  <<"Language" <<this->Language
+  <<"Left"     <<Term
   <<finalize;
 
   long Count = db::count(this->Db_Client,"relations",Find_Val,1);
@@ -151,7 +161,8 @@ bool chatter::term_is_in_db(string Term) {
 
   //check name of relation
   Find_Val = document{}
-  <<"Name" <<Term
+  <<"Language" <<this->Language
+  <<"Name"     <<Term
   <<finalize;
 
   Count = db::count(this->Db_Client,"relations",Find_Val,1);
@@ -160,7 +171,8 @@ bool chatter::term_is_in_db(string Term) {
 
   //check right side of relation
   Find_Val = document{}
-  <<"Right" <<Term
+  <<"Language" <<this->Language
+  <<"Right"    <<Term
   <<finalize;
 
   Count = db::count(this->Db_Client,"relations",Find_Val,1);
@@ -203,7 +215,7 @@ vector<string> chatter::get_terms_in_component(string Component) {
 
     //no possible combinations of tokens to make a known term
     if (Index==(long)Tokens.size()) {
-      Terms.push_back(this->what()+"?");
+      Terms.push_back(this->what());
       Tokens.erase(Tokens.begin());
       continue;
     }
@@ -283,13 +295,17 @@ string chatter::get_reply_for_text(string Text) {
 /**
  * Check term reflection, eg. i->you, you->i
  */
-string chatter::check_reflection(string Term) {
+string chatter::check_reflection(string Term,string Type) {
   mapss Reflects = chatter::REFLECTS[this->Language];
 
-  if (Reflects.count(Term)==1)
-    return Reflects[Term];
-  else 
-    return Term;
+  if (Reflects.count(Term+"-"+Type)==1)
+    return Reflects[Term+"-"+Type];
+  else { 
+    if (Reflects.count(Term)==1)
+      return Reflects[Term];
+    else
+      return Term;
+  }
 }
 
 /**
@@ -325,13 +341,13 @@ void chatter::add_svo(string Fragment) {
   Subject = utils::tidy_up(Subject);
   Verb    = utils::tidy_up(Verb);
   Object  = utils::tidy_up(Object);
-  Subject = this->check_reflection(Subject);
-  Object  = this->check_reflection(Object);
+  Subject = this->check_reflection(Subject,chatter::SUBJECT);
+  Object  = this->check_reflection(Object,chatter::OBJECT);
 
   //create nodes & relation
-  node     Node1(Subject);
-  node     Node2(Object);
-  relation Relation(&Node1,&Node2,Verb);
+  node     Node1(Subject,this->Language);
+  node     Node2(Object,this->Language);
+  relation Relation(&Node1,&Node2,Verb,this->Language);
 
   try {
     Node1.save_to_db(this->Db_Client);
@@ -377,12 +393,12 @@ void chatter::add_sv(string Fragment) {
   to_lower(Verb);
   Subject = utils::tidy_up(Subject);
   Verb    = utils::tidy_up(Verb);
-  Subject = this->check_reflection(Subject);
+  Subject = this->check_reflection(Subject,chatter::SUBJECT);
 
   //create nodes & relation
-  node     Node1(Subject);
-  node     Node2("");
-  relation Relation(&Node1,&Node2,Verb);
+  node     Node1(Subject,this->Language);
+  node     Node2("",this->Language);
+  relation Relation(&Node1,&Node2,Verb,this->Language);
 
   try {
     Node1.save_to_db(this->Db_Client);
@@ -426,12 +442,12 @@ void chatter::add_compounds(string Fragment) {
   for (long Index=0; Index<(long)Tokens.size()-1; Index++) {
     string Token1 = Tokens[Index];
     string Token2 = Tokens[Index+1];
-    Token1 = this->check_reflection(Token1);
-    Token2 = this->check_reflection(Token2);
+    Token1 = this->check_reflection(Token1,chatter::TERM);
+    Token2 = this->check_reflection(Token2,chatter::TERM);
 
-    node     Node1(Token1);
-    node     Node2(Token2);
-    relation Relation(&Node1,&Node2,string("-"));
+    node     Node1(Token1,this->Language);
+    node     Node2(Token2,this->Language);
+    relation Relation(&Node1,&Node2,string("-"),this->Language);
 
     try {
       Node1.save_to_db(this->Db_Client);
@@ -484,8 +500,8 @@ void chatter::add_terms(string Fragment) {
     string Token = Tokens[Index];
 
     //create node instance
-    Token = this->check_reflection(Token);
-    node Node(Token);
+    Token = this->check_reflection(Token,chatter::TERM);
+    node Node(Token,this->Language);
 
     try {
       Node.save_to_db(this->Db_Client);

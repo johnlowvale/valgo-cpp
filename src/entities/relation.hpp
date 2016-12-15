@@ -41,14 +41,15 @@ namespace Entities {
 
     //public properties
     public:
-      string Id;    //left+name+right
-      node*  Left;  //eg. galaxy-note-3
-      node*  Right; //eg. samsung
-      string Name;  //eg. is-created-by, is-a-child-of,...
+      string Id;       //left+name+right
+      string Language; //name of natural language
+      node*  Left;     //eg. galaxy-note-3
+      node*  Right;    //eg. samsung
+      string Name;     //eg. is-created-by, is-a-child-of,...
 
     //public constructor and methods
     public:
-      relation(node* Left,node* Right,string Name);
+      relation(node* Left,node* Right,string Name,string Language);
       ~relation();
 
       void save_to_db(client& Db_Client);

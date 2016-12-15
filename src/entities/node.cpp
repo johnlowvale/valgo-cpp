@@ -29,8 +29,9 @@ using namespace Miscs;
 /**
  * Constructor
  */
-node::node(string Id) {
-  this->Id = Id;
+node::node(string Id,string Language) {
+  this->Id       = Id;
+  this->Language = Language;
 }
 
 /** 
@@ -53,9 +54,10 @@ void node::add_relation(relation* Relation) {
 void node::save_to_db(client& Db_Client) {
   document Document;
   Document 
-  <<"_id"     <<this->Id
-  <<"Id"      <<this->Id
-  <<"Content" <<"";
+  <<"_id"      <<this->Id
+  <<"Id"       <<this->Id
+  <<"Language" <<this->Language
+  <<"Content"  <<"";
 
   db::insert_one(Db_Client,"nodes",Document);
 }

@@ -37,6 +37,10 @@ namespace Chatting {
       static string            INFORMATION_SUPPORT;
       static map<string,mapss> REFLECTS; //term reflection, eg. I-->you
       static map<string,mapss> WHATS; //used when a term is not understood
+      static string            SUBJECT;
+      static string            RELATION;
+      static string            OBJECT;
+      static string            TERM;
 
     //public reference properties
     public:
@@ -62,7 +66,7 @@ namespace Chatting {
       vector<string> get_terms_in_component(string Component);
       string         get_reply_for_sentence(string Sentence);
       string         get_reply_for_text(string Text);
-      string         check_reflection(string Token);
+      string         check_reflection(string Token,string Type);
       string         what();
       void           add_svo(string Fragment);
       void           add_sv(string Fragment);
