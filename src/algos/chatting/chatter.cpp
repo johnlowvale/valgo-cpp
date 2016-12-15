@@ -257,6 +257,9 @@ string chatter::find_most_concerned_term(vector<string> Terms) {
   double Max_Importance = Lowest;
   string Most_Concerned_Term("");
 
+  //list of concerns
+  map<double,vector<string>> Concerns;
+
   //loop thru' all terms
   for (string Term: Terms) {
     node    Node(Term,this->Language);
@@ -269,6 +272,13 @@ string chatter::find_most_concerned_term(vector<string> Terms) {
     //get data of concerned term
     Concern.load_by_id(this->Db_Client);
 
+    //add to concern list
+    if (Concerns.count(Concern.Importance)==0)
+      Concerns[Concern.Importance] = vector<string>{};
+
+    //add term
+    Concerns[Concern.Importance].push_back(Concern.Node->Id);
+
     //more important?
     if (Concern.Importance>Max_Importance) {
       Max_Importance      = Concern.Importance;
@@ -278,8 +288,12 @@ string chatter::find_most_concerned_term(vector<string> Terms) {
 
   if (Max_Importance==Lowest)
     return this->what();
-  else
-    return Most_Concerned_Term;
+  else {
+    vector<string> Most_Concerns = Concerns[Max_Importance];
+    long Random_Index = (long)floor(utils::random()*Most_Concerns.size());
+
+    return Most_Concerns[Random_Index];
+  }
 }
 
 /**
