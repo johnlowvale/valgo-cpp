@@ -5,6 +5,7 @@
  * @version 0.1
  * @author  Dat Dinhquoc
  */
+var Chatbot_Name = "Lazada Chatbot";
 
 /**
  * Append somthing to chatlog
@@ -45,7 +46,8 @@ function send_text(event) {
   //send to server
   $.post("http://"+location.host+"/chat",JSON.stringify({
     Text:     Text,
-    Language: "English"
+    Language: "English",
+    Chatbot:  Chatbot_Name
   })).
   done(function(Data){
     append_chatlog("Chatbot",Data.Reply,"black");

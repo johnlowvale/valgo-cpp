@@ -52,6 +52,7 @@ namespace Chatting {
     public:
       string Motivation;
       string Language;
+      string Name;
 
     //public constructor, destructor and methods
     public:
@@ -68,11 +69,13 @@ namespace Chatting {
       string         get_reply_for_text(string Text);
       string         check_reflection(string Token,string Type);
       string         what();
+      void           set_concern(string Fragment);
+      void           swap_concern(string Fragment);
       void           add_svo(string Fragment);
       void           add_sv(string Fragment);
       void           add_compounds(string Fragment);
       void           add_terms(string Fragment);
-      void           add_terms_and_relations(string Text);
+      void           add_terms_relations_concerns(string Text);
       void           run();
   };
 

@@ -35,6 +35,7 @@
 #include <types.hpp>
 #include <algos/learning/neunet.hpp>
 #include <algos/chatting/chatter.hpp>
+#include <entities/concern.hpp>
 #include <entities/node.hpp>
 #include <entities/relation.hpp>
 #include <miscs/db.hpp>
@@ -277,9 +278,9 @@ string chatter::get_reply_for_sentence(string Sentence) {
       if (Jndex==0)
         Reply += Terms[Jndex];
       else
-        Reply += "+"+Terms[Jndex];
+        Reply += " "+Terms[Jndex];
 
-    Reply += "; ";
+    Reply += ". ";
   }
 
   return Reply;
@@ -329,6 +330,84 @@ string chatter::check_reflection(string Term,string Type) {
  */
 string chatter::what() {
   return chatter::WHATS[this->Language]["what"];
+}
+
+/**
+ * Set importance value for a concern
+ */
+void chatter::set_concern(string Fragment) {
+  vector<string> Tokens;
+  split(Tokens,Fragment,is_any_of("="));
+
+  //get values
+  string Concern   = Tokens[0];
+  string Value_Str = Tokens[1];
+  trim(Concern);
+  trim(Value_Str);
+
+  //skip if there is any empty value
+  if (Concern.length()==0 || Value_Str.length()==0)
+    return;
+
+  //skip bad double value
+  if (!utils::is_double(Value_Str))
+    return;
+
+  //convert concern value to double
+  double Value = utils::to_double(Value_Str);
+
+  //format values
+  to_lower(Concern);
+  Concern = utils::tidy_up(Concern);
+  Concern = this->check_reflection(Concern,chatter::TERM);
+
+  //create instances
+  node    Node(Concern,this->Language);
+  concern Concern1(this->Name,&Node,Value);
+
+  try {
+    Node.save_to_db(this->Db_Client);
+  }
+  catch (operation_exception& Exception) {
+    utils::print_db_exception(Exception);
+  }
+
+  try {
+    Concern1.save_or_update_to_db(this->Db_Client);
+  }
+  catch (operation_exception& Exception) {
+    utils::print_db_exception(Exception);
+  }
+}
+
+/**
+ * Swap importance values of 2 concerns
+ */
+void chatter::swap_concern(string Fragment) {
+  vector<string> Tokens;
+  split(Tokens,Fragment,is_any_of(">"));
+
+  //get values
+  string More_Concern = Tokens[0];
+  string Less_Concern = Tokens[1];
+  trim(More_Concern);
+  trim(Less_Concern);
+
+  //skip if there is any empty value
+  if (More_Concern.length()==0 || Less_Concern.length()==0)
+    return;
+
+  //format values
+  to_lower(More_Concern);
+  to_lower(Less_Concern);
+  More_Concern = utils::tidy_up(More_Concern);
+  Less_Concern = utils::tidy_up(Less_Concern);
+
+  //reflection
+  More_Concern = this->check_reflection(More_Concern,chatter::TERM);
+  Less_Concern = this->check_reflection(Less_Concern,chatter::TERM);
+
+  //???
 }
 
 /**
@@ -541,31 +620,44 @@ void chatter::add_terms(string Fragment) {
 }
 
 /**
- * Add terms and relations to db
+ * Add terms, relations, concerns to db
  */
-void chatter::add_terms_and_relations(string Text) {
+void chatter::add_terms_relations_concerns(string Text) {
   Text = Text.substr(5);
 
   //split text into knowledge fragments, fragments are separated by ';'
   //term list:           term,term,term,...
   //compound list:       term+term+term+...
-  //subject-verb:        term>term
-  //subject-verb-object: term>term>term
+  //subject-verb:        term/term
+  //subject-verb-object: term/term/term
+  //concerns:            term>term
   vector<string> Fragments;
   split(Fragments,Text,is_any_of(";"));
 
   //parse each fragment
   for (string Fragment: Fragments) {
     trim(Fragment);
-    long Slash_Count = count(Fragment.begin(),Fragment.end(),'/');
-    long Plus_Count  = count(Fragment.begin(),Fragment.end(),'+');
-    long Comma_Count = count(Fragment.begin(),Fragment.end(),',');
+    long Equal_Count       = count(Fragment.begin(),Fragment.end(),'=');
+    long Greaterthan_Count = count(Fragment.begin(),Fragment.end(),'>');
+    long Slash_Count       = count(Fragment.begin(),Fragment.end(),'/');
+    long Plus_Count        = count(Fragment.begin(),Fragment.end(),'+');
+    long Comma_Count       = count(Fragment.begin(),Fragment.end(),',');
 
     //skip bad fragment
+    if (Equal_Count>1)
+      continue;
+    if (Greaterthan_Count>1)
+      continue;
     if (Slash_Count>2)
       continue;
 
-    //svo
+    //add, modify terms relations concerns
+    if (Equal_Count==1)
+      this->set_concern(Fragment);
+    else
+    if (Greaterthan_Count==1)
+      this->swap_concern(Fragment);
+    else
     if (Slash_Count==2)
       this->add_svo(Fragment);
     else
@@ -592,16 +684,18 @@ void chatter::run() {
   ptree  Content  = utils::get_request_content_ptree(Request);
   string Text     = Content.get<string>("Text");
   string Language = Content.get<string>("Language");
+  string Chatbot  = Content.get<string>("Chatbot");
   cout <<"\nA human said " <<Text <<endl;
 
   //config
   this->Language = Language;
+  this->Name     = Chatbot;
 
   //result
   ptree Result;
   if (Text.substr(0,5)==string("/add")+" ") { //the space is important
-    this->add_terms_and_relations(Text);
-    Result.put("Reply","Added terms and relations!");
+    this->add_terms_relations_concerns(Text);
+    Result.put("Reply","Information added!");
   }
   else
     Result.put("Reply",this->get_reply_for_text(Text));

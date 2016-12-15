@@ -359,19 +359,19 @@ void server::handle_post_chat(response Response,request Request) {
 void server::create_indices() {
   cout <<"\nCreating indices in DB..." <<endl;
 
-  //weblocs
+  //weblocs (web locations for crawlers)
   cout <<"weblocs.Revisit_At" <<endl;
   db::create_index(this->Db_Client,"weblocs","Revisit_At",R"({
     "Revisit_At": 1
   })");
 
-  //contents
+  //contents (contents saved by crawlers)
   cout <<"contents.*" <<endl;
   db::create_index(this->Db_Client,"contents","Wildcard",R"({
     "$**": "text"
   })");  
 
-  //relations
+  //relations (relations between nodes for chatting, reasoning)
   cout <<"relations.Language+Left+Name+Right" <<endl;
   db::create_index(this->Db_Client,"relations","Language_Left_Name_Right",R"({
     "Language": 1,
@@ -379,6 +379,12 @@ void server::create_indices() {
     "Name":     1,
     "Right":    1
   })");
+
+  //concerns (concerning terms of different AI beings, or chatbots)
+  cout <<"concerns.Ai_Name" <<endl;
+  db::create_index(this->Db_Client,"concerns","Ai_Name",R"({
+    "Ai_Name": 1
+  })");  
 
   cout <<"Indices created." <<endl <<endl;
 }

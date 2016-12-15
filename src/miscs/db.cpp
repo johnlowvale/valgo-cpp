@@ -222,6 +222,19 @@ value& Find_Value,value& Update_Value) {
 }
 
 /**
+ * Upsert one document
+ */
+void db::upsert_one(client& Db_Client,const char* Collection_Name,
+value& Find_Value,value& Update_Value) {
+  options::update Options;
+  Options.upsert(true);
+
+  Db_Client[db::DB_NAME][Collection_Name].update_one(
+    Find_Value.view(),Update_Value.view(),Options
+  );
+}
+
+/**
  * Test inserting into db
  */
 void db::test() {

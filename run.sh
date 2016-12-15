@@ -216,6 +216,26 @@ else
     exit
   fi
 fi
+
+md5sum concern.cpp >temp.md5
+if cmp -s temp.md5 concern.md5
+then
+  echo "concern.cpp (unchanged)"
+else
+  echo "concern.cpp is being compiled..."
+  if g++-6 -std=c++14 -Wall -Wfatal-errors -c -o concern.o concern.cpp
+  then
+    md5sum concern.cpp >concern.md5
+    tput setaf 2
+    echo "(compiled)"
+    tput sgr0
+  else
+    tput setaf 1
+    echo "(failed)"
+    tput sgr0
+    exit
+  fi
+fi
 #-------------------------------------------------------------------------------
 cd ..
 echo "All entities files compiled."
@@ -377,7 +397,7 @@ echo "Linking object files to executable..."
 cd ../build
 g++-6 -std=c++14 -Wall -Wfatal-errors -pthread -o server \
 server.o searcher.o tipper.o neuron.o neunet.o chatter.o crawler.o utils.o \
-db.o moment.o webloc.o content.o relation.o node.o graph.o \
+db.o moment.o webloc.o content.o relation.o node.o graph.o concern.o \
 -lboost_system -lboost_filesystem -lboost_regex -lbsoncxx -lmongocxx \
 -luriparser -lhtmlcxx
 echo "Linked."

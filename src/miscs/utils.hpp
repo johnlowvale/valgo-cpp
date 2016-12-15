@@ -96,6 +96,8 @@ namespace Miscs {
       static void   print_request(request Request);
       static double random();
       static string tidy_up(string Str);
+      static bool   is_double(string Str);
+      static double to_double(string Str);
 
       //file operations
       static string read_file(string Path);

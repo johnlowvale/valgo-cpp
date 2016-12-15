@@ -20,6 +20,7 @@
 
 //library headers
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -300,6 +301,32 @@ string utils::tidy_up(string Str) {
 
   trim(Str);
   return Str;
+}
+
+/**
+ * Check if a string is double
+ */
+bool utils::is_double(string Str) {
+  try {
+    lexical_cast<double>(Str);
+    return true;
+  }
+  catch (bad_lexical_cast& Error) {
+    return false;
+  }
+}
+
+/**
+ * Convert string to double
+ */
+double utils::to_double(string Str) {
+  try {
+    double Value = lexical_cast<double>(Str);
+    return Value;
+  }
+  catch (bad_lexical_cast& Error) {
+    return 0;
+  }
 }
 
 /**
