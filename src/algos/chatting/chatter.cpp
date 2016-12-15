@@ -71,11 +71,13 @@ map<string,mapss> chatter::REFLECTS = {
     {"my",          "your"},
     {"mine",        "yours"},
     {"myself",      "yourself"},
+    {"am",          "are"},
     {"you-subject", "i"},
     {"you-object",  "me"},
     {"your",        "my"},
     {"yours",       "mine"},
-    {"yourself",    "myself"}
+    {"yourself",    "myself"},
+    {"are",         "am"}
   }}
 };
 
@@ -133,8 +135,22 @@ string chatter::tokens_to_term(vector<string> Tokens,long To_Before) {
   string Term("");
 
   for (long Index=0; Index<To_Before; Index++) {
-    string Token = this->check_reflection(Tokens[Index],chatter::TERM);
+    string Token;
+    string Original_Token = Token;
 
+    //check subject reflection
+    Token = this->check_reflection(Tokens[Index],chatter::SUBJECT);
+    if (Token==Original_Token) {
+
+      //check object reflection
+      Token = this->check_reflection(Tokens[Index],chatter::OBJECT);
+
+      //check generic reflection
+      if (Token==Original_Token)
+        Token = this->check_reflection(Tokens[Index],chatter::TERM);
+    }
+
+    //join tokens (words or syllables)
     if (Index==0)
       Term += Token;
     else
@@ -256,7 +272,7 @@ string chatter::get_reply_for_sentence(string Sentence) {
     string         Component = Components[Index];
     vector<string> Terms     = this->get_terms_in_component(Component);
 
-    //??? ???
+    //???
     for (long Jndex=0; Jndex<(long)Terms.size(); Jndex++)
       if (Jndex==0)
         Reply += Terms[Jndex];
@@ -341,7 +357,13 @@ void chatter::add_svo(string Fragment) {
   Subject = utils::tidy_up(Subject);
   Verb    = utils::tidy_up(Verb);
   Object  = utils::tidy_up(Object);
-  Subject = this->check_reflection(Subject,chatter::SUBJECT);
+
+  //reflect verb if subject is reflected
+  string Subject_Reflect = this->check_reflection(Subject,chatter::SUBJECT);
+  if (Subject!=Subject_Reflect)
+    Verb = this->check_reflection(Verb,chatter::TERM);
+
+  Subject = Subject_Reflect;
   Object  = this->check_reflection(Object,chatter::OBJECT);
 
   //create nodes & relation
@@ -393,7 +415,13 @@ void chatter::add_sv(string Fragment) {
   to_lower(Verb);
   Subject = utils::tidy_up(Subject);
   Verb    = utils::tidy_up(Verb);
-  Subject = this->check_reflection(Subject,chatter::SUBJECT);
+
+  //reflect verb if subject is reflected
+  string Subject_Reflect = this->check_reflection(Subject,chatter::SUBJECT);
+  if (Subject!=Subject_Reflect)
+    Verb = this->check_reflection(Verb,chatter::TERM);
+
+  Subject = Subject_Reflect;
 
   //create nodes & relation
   node     Node1(Subject,this->Language);
