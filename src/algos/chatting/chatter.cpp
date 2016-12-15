@@ -407,7 +407,32 @@ void chatter::swap_concern(string Fragment) {
   More_Concern = this->check_reflection(More_Concern,chatter::TERM);
   Less_Concern = this->check_reflection(Less_Concern,chatter::TERM);
 
-  //???
+  //insert concerns into db if not existing
+  node    Node1(More_Concern,this->Language);
+  node    Node2(Less_Concern,this->Language);
+  concern Concern1(this->Name,&Node1,0);
+  concern Concern2(this->Name,&Node2,0);
+
+  if (!Concern1.exists(this->Db_Client))
+    Concern1.save_to_db(this->Db_Client);
+  if (!Concern2.exists(this->Db_Client))
+    Concern2.save_to_db(this->Db_Client);
+
+  //load the 2 concerns
+  Concern1.load_by_id(this->Db_Client);
+  Concern2.load_by_id(this->Db_Client);
+
+  //no swapping if concern1 already has higher importance
+  if (Concern1.Importance>Concern2.Importance)
+    return;
+
+  //swap the importance values and save back to db
+  double Temp         = Concern1.Importance;
+  Concern1.Importance = Concern2.Importance;
+  Concern2.Importance = Temp;
+
+  Concern1.save_or_update_to_db(this->Db_Client);
+  Concern2.save_or_update_to_db(this->Db_Client);
 }
 
 /**
