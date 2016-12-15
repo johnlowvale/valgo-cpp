@@ -286,8 +286,11 @@ string chatter::find_most_concerned_term(vector<string> Terms) {
     }
   }//term loop
 
-  if (Max_Importance==Lowest)
-    return this->what();
+  if (Max_Importance==Lowest) {
+    long Random_Index = (long)floor(utils::random()*Terms.size());
+
+    return Terms[Random_Index];
+  }
   else {
     vector<string> Most_Concerns = Concerns[Max_Importance];
     long Random_Index = (long)floor(utils::random()*Most_Concerns.size());
