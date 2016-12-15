@@ -79,4 +79,43 @@ void concern::save_or_update_to_db(client& Db_Client) {
   db::upsert_one(Db_Client,"concerns",Find_Val,Upsert_Val);
 }
 
+/**
+ * Check if this concern exists
+ */
+bool concern::exists(client& Db_Client) {
+  value Find_Val = document{}
+  <<"_id" <<this->Id
+  <<finalize;
+
+  //count
+  int64 Count = db::count(Db_Client,"concerns",Find_Val,1);
+
+  if (Count==1)
+    return true;
+  else
+    return false;
+}
+
+/**
+ * Load concern data from db using id
+ */
+void concern::load_by_id(client& Db_Client) {
+  value Find_Val = document{}
+  <<"_id" <<this->Id
+  <<finalize;
+
+  //get data from db
+  cursor Cursor = db::find(Db_Client,"concerns",Find_Val,1);
+  view   View;
+  for (view Temp: Cursor) {
+    View = Temp;
+    break;
+  }
+
+  //update instance values
+  this->Ai_Name    = db::get_string(View["Ai_Name"]);
+  this->Node->Id   = db::get_string(View["Node"]);
+  this->Importance = db::get_double(View["Importance"]);
+}
+
 //end of file

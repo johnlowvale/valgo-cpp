@@ -273,7 +273,7 @@ string chatter::get_reply_for_sentence(string Sentence) {
     string         Component = Components[Index];
     vector<string> Terms     = this->get_terms_in_component(Component);
 
-    //???
+    //??? ???
     for (long Jndex=0; Jndex<(long)Terms.size(); Jndex++)
       if (Jndex==0)
         Reply += Terms[Jndex];
@@ -718,9 +718,9 @@ void chatter::run() {
 
   //result
   ptree Result;
-  if (Text.substr(0,5)==string("/add")+" ") { //the space is important
+  if (Text.substr(0,5)==string("/set")+" ") { //the space is important
     this->add_terms_relations_concerns(Text);
-    Result.put("Reply","Information added!");
+    Result.put("Reply","Information set!");
   }
   else
     Result.put("Reply",this->get_reply_for_text(Text));

@@ -49,6 +49,8 @@ namespace Entities {
 
       void save_to_db(client& Db_Client);
       void save_or_update_to_db(client& Db_Client);
+      bool exists(client& Db_Client);
+      void load_by_id(client& Db_Client);
   };
 }//namespace path
 
