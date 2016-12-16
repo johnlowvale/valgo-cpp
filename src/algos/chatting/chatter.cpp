@@ -286,15 +286,31 @@ string chatter::find_most_concerned_term(vector<string> Terms) {
     }
   }//term loop
 
+  //no concerns found
   if (Max_Importance==Lowest) {
-    long Random_Index = (long)floor(utils::random()*Terms.size());
+    vector<string> Temps;
 
-    return Terms[Random_Index];
+    //add those terms which are not 'what?' to Temps
+    for (string Term: Terms)
+      if (Term!=this->what())
+        Temps.push_back(Term);
+
+    //original term list has some terms
+    if (Temps.size()>0) {
+      long Random_Index = (long)floor(utils::random()*Temps.size());
+      return Temps[Random_Index];
+    }
+
+    //only 'what?' in original term list
+    else
+      return this->what();
   }
+
+  //found most concerned term
   else {
     vector<string> Most_Concerns = Concerns[Max_Importance];
-    long Random_Index = (long)floor(utils::random()*Most_Concerns.size());
 
+    long Random_Index = (long)floor(utils::random()*Most_Concerns.size());
     return Most_Concerns[Random_Index];
   }
 }
