@@ -334,8 +334,7 @@ string chatter::get_reply_for_sentence(string Sentence) {
       Components.push_back(Item);
   }
 
-  //make reply
-  string         Reply("");
+  //get all terms in sentence
   vector<string> All_Terms;
   for (long Index=0; Index<(long)Components.size(); Index++) {
     string         Component = Components[Index];
@@ -349,7 +348,36 @@ string chatter::get_reply_for_sentence(string Sentence) {
   //find most concerned term
   string Concerned_Term = this->find_most_concerned_term(All_Terms);
 
-  return Concerned_Term;
+  //unknown term
+  if (Concerned_Term==this->what())
+    return Concerned_Term;
+  if (!this->term_is_in_db(Concerned_Term))
+    return this->what();
+
+  //known term, find a relation
+  vector<vector<string>> Relations = 
+  relation::find_term(this->Db_Client,Concerned_Term);
+  
+  //no relations found
+  if (Relations.size()==0)
+    return this->what();
+
+  //get a random relation
+  long           Random_Index = (long)floor(utils::random()*Relations.size());
+  vector<string> Relation     = Relations[Random_Index]; 
+
+  //make reply
+  string Reply;
+
+  //compound relation (not svo)
+  if (Relation[1]=="-")
+    Reply = Relation[0]+" "+Relation[2];
+
+  //subject-verb-object
+  else
+    Reply = Relation[0]+" "+Relation[1]+" "+Relation[2];
+
+  return Reply;
 }
 
 /**

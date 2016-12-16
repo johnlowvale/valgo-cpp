@@ -54,4 +54,61 @@ void relation::save_to_db(client& Db_Client) {
   db::insert_one(Db_Client,"relations",Doc);
 }
 
+/**
+ * Find relations containing a term
+ */
+vector<vector<string>> relation::find_term(client& Db_Client,string Term) {
+  vector<vector<string>> Results;
+
+  //find in left values
+  value Find_Val = document{}
+  <<"Left" <<Term
+  <<finalize;
+
+  cursor Cursor = db::find(Db_Client,"relations",Find_Val);
+  for (view View: Cursor) {
+    vector<string> Entry;
+
+    Entry.push_back(db::get_string(View["Left"]));
+    Entry.push_back(db::get_string(View["Name"]));
+    Entry.push_back(db::get_string(View["Right"]));
+
+    Results.push_back(Entry);
+  }
+
+  //find in name values
+  Find_Val = document{}
+  <<"Name" <<Term
+  <<finalize;
+
+  Cursor = db::find(Db_Client,"relations",Find_Val);
+  for (view View: Cursor) {
+    vector<string> Entry;
+
+    Entry.push_back(db::get_string(View["Left"]));
+    Entry.push_back(db::get_string(View["Name"]));
+    Entry.push_back(db::get_string(View["Right"]));
+
+    Results.push_back(Entry);
+  }
+
+  //find in right values
+  Find_Val = document{}
+  <<"Right" <<Term
+  <<finalize;
+
+  Cursor = db::find(Db_Client,"relations",Find_Val);
+  for (view View: Cursor) {
+    vector<string> Entry;
+
+    Entry.push_back(db::get_string(View["Left"]));
+    Entry.push_back(db::get_string(View["Name"]));
+    Entry.push_back(db::get_string(View["Right"]));
+
+    Results.push_back(Entry);
+  }
+
+  return Results;
+}
+
 //end of file

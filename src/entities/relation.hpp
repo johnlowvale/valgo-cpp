@@ -12,6 +12,7 @@
 
 //standard c++ headers
 #include <string>
+#include <vector>
 
 //library headers
 #include <bsoncxx/json.hpp>
@@ -47,12 +48,16 @@ namespace Entities {
       node*  Right;    //eg. samsung
       string Name;     //eg. is-created-by, is-a-child-of,...
 
+    //static methods
+    public:
+      static vector<vector<string>> find_term(client& Db_Client,string Term);
+
     //public constructor and methods
     public:
       relation(node* Left,node* Right,string Name,string Language);
       ~relation();
 
-      void save_to_db(client& Db_Client);
+      void save_to_db(client& Db_Client);      
   };
 }//namespace path
 
