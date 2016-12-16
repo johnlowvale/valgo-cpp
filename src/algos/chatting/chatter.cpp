@@ -15,6 +15,7 @@
 //standard c++ headers
 #include <algorithm>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <vector>
@@ -232,7 +233,7 @@ vector<string> chatter::get_terms_in_component(string Component) {
     }
 
     //no possible combinations of tokens to make a known term
-    if (Index==(long)Tokens.size()) {
+    if (Index==-1) {
       Terms.push_back(this->what());
       Tokens.erase(Tokens.begin());
       continue;
