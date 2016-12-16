@@ -223,7 +223,7 @@ vector<string> chatter::get_terms_in_component(string Component) {
     //try to make a term with fewest tokens
     string Term;
     long   Index;
-    for (Index=0; Index<(long)Tokens.size(); Index++) {
+    for (Index=Tokens.size()-1; Index>=0; Index--) {
       Term = this->tokens_to_term(Tokens,Index+1);
       
       //term found in db
