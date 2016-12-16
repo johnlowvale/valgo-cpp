@@ -50,7 +50,8 @@ namespace Entities {
 
     //static methods
     public:
-      static vector<vector<string>> find_term(client& Db_Client,string Term);
+      static vector<vector<string>> find_term(client& Db_Client,
+      string Language,string Term);
 
     //public constructor and methods
     public:

@@ -356,7 +356,7 @@ string chatter::get_reply_for_sentence(string Sentence) {
 
   //known term, find a relation
   vector<vector<string>> Relations = 
-  relation::find_term(this->Db_Client,Concerned_Term);
+  relation::find_term(this->Db_Client,this->Language,Concerned_Term);
   
   //no relations found
   if (Relations.size()==0)

@@ -57,12 +57,14 @@ void relation::save_to_db(client& Db_Client) {
 /**
  * Find relations containing a term
  */
-vector<vector<string>> relation::find_term(client& Db_Client,string Term) {
+vector<vector<string>> relation::find_term(client& Db_Client,
+string Language,string Term) {
   vector<vector<string>> Results;
 
   //find in left values
   value Find_Val = document{}
-  <<"Left" <<Term
+  <<"Language" <<Language
+  <<"Left"     <<Term
   <<finalize;
 
   cursor Cursor = db::find(Db_Client,"relations",Find_Val);
@@ -78,7 +80,8 @@ vector<vector<string>> relation::find_term(client& Db_Client,string Term) {
 
   //find in name values
   Find_Val = document{}
-  <<"Name" <<Term
+  <<"Language" <<Language
+  <<"Name"     <<Term
   <<finalize;
 
   Cursor = db::find(Db_Client,"relations",Find_Val);
@@ -94,7 +97,8 @@ vector<vector<string>> relation::find_term(client& Db_Client,string Term) {
 
   //find in right values
   Find_Val = document{}
-  <<"Right" <<Term
+  <<"Language" <<Language
+  <<"Right"    <<Term
   <<finalize;
 
   Cursor = db::find(Db_Client,"relations",Find_Val);
