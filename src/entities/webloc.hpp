@@ -19,6 +19,7 @@
 #include <mongocxx/client.hpp>
 
 //in-project headers
+#include <consts.hpp>
 #include <types.hpp>
 
 //standard c++ namespaces being used
@@ -49,6 +50,9 @@ namespace Entities {
       int64  Added_At;
       long   Visit_Count;
 
+      //not to store in db
+      bool   Is_Valid;
+
       //map time to html, not to add more into this map
       //if current html of the web page stay unchanged
       //THIS PROPERTY IS UNUSED, TOO MANY ENTRIES OF HTML CONTENTS.
@@ -62,7 +66,7 @@ namespace Entities {
       ~webloc();
 
       //db operations
-      string save_to_db(client& Db_Client);
+      string save_to_db(client& Db_Client,int64 Crawl_At=ONE_HOUR_MILLI);
   };
 }//namespace path
 

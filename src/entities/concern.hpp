@@ -1,14 +1,14 @@
 /**
  * vAlgo++ Smart Algorithm Service
  * Copyright (c) Abivin JSC
- * @file     Node entity class header file
+ * @file     Node concern entity class header file
  * @version  0.1
  * @author   Dat Dinhquoc
  */
 
 //include guard begin
-#ifndef ENTITIES_NODE_HPP
-#define ENTITIES_NODE_HPP
+#ifndef ENTITIES_CONCERN_HPP
+#define ENTITIES_CONCERN_HPP
 
 //standard c++ headers
 #include <string>
@@ -19,7 +19,7 @@
 
 //in-project headers
 #include <types.hpp>
-#include <entities/content.hpp>
+#include <entities/node.hpp>
 
 //standard c++ namespaces being used
 using namespace std;
@@ -30,28 +30,27 @@ using namespace Entities;
 //namespace path
 namespace Entities {
 
-  //forward declarations
-  class relation;
-
   /**
-   * Node class
+   * Concern class
    */
-  class node {
+  class concern {
 
     //public properties
     public:
-      string            Id;
-      string            Language;
-      content*          Content;
-      vector<relation*> Relations;
+      string Id;
+      string Ai_Name;
+      node*  Node;
+      double Importance;     
 
     //public constructor and methods
     public:
-      node(string Id,string Language);
-      ~node();
+      concern(string Ai_Name,node* Node,double Importance);
+      ~concern();
 
-      void add_relation(relation* Relation);
       void save_to_db(client& Db_Client);
+      void save_or_update_to_db(client& Db_Client);
+      bool exists(client& Db_Client);
+      void load_by_id(client& Db_Client);
   };
 }//namespace path
 

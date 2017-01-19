@@ -179,8 +179,36 @@ const char* Index_Name,const char* Index_Info) {
  * Find documents in collection
  */
 cursor db::find(client& Db_Client,const char* Collection_Name,
-value& Value) {
-  return Db_Client[db::DB_NAME][Collection_Name].find(Value.view());
+value& Value,long Limit) {
+  if (Limit==0)
+    return Db_Client[db::DB_NAME][Collection_Name].find(Value.view());
+  else {
+    options::find Options;
+    Options.limit(Limit);
+
+    return Db_Client[db::DB_NAME][Collection_Name].find(
+      Value.view(),
+      Options
+    );
+  }//else
+}
+
+/**
+ * Count documents in collection
+ */
+int64 db::count(client& Db_Client,const char* Collection_Name,
+value& Value,long Limit) {
+  if (Limit==0)
+    return Db_Client[db::DB_NAME][Collection_Name].count(Value.view());
+  else {
+    options::count Options;
+    Options.limit(Limit);
+
+    return Db_Client[db::DB_NAME][Collection_Name].count(
+      Value.view(),
+      Options
+    );
+  }//else
 }
 
 /**
@@ -190,6 +218,19 @@ void db::update_one(client& Db_Client,const char* Collection_Name,
 value& Find_Value,value& Update_Value) {
   Db_Client[db::DB_NAME][Collection_Name].update_one(
     Find_Value.view(),Update_Value.view()
+  );
+}
+
+/**
+ * Upsert one document
+ */
+void db::upsert_one(client& Db_Client,const char* Collection_Name,
+value& Find_Value,value& Update_Value) {
+  options::update Options;
+  Options.upsert(true);
+
+  Db_Client[db::DB_NAME][Collection_Name].update_one(
+    Find_Value.view(),Update_Value.view(),Options
   );
 }
 

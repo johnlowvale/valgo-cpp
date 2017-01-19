@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Lazada.vn</title>
+
+    <!--library-->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+    <!--js for chatbot-->
+    <script src="/file/chatting/index.js"></script>
+
+    <!--css for chatbot-->
+    <link rel="stylesheet" href="/file/chatting/index.css"/>
+  </head>
+
+  <body>
+    <img src="/file/chatting/images/lazada.jpg" style="width:100%;"/>
+
+    <!--chatbox embed/begin-->
+    <div id="Chat-Box">
+      <span id="Chat-Title">
+        <a target="_blank" href="http://abivin.com">Abivin vBot</a>
+      </span>
+      <span id="Chat-Close" onclick="toggle_chatbox();">&#10060;</span>
+      <div id="Chat-Log">
+        Chatbot: All salespersons are offline, I'm chatbot. How may I help?
+      </div>
+      <textarea id="Chat-Text" onkeyup="send_text(event);"></textarea>
+    </div>
+    <img id="Chat-Button" onclick="toggle_chatbox();"
+    src="/file/chatting/images/chat-bubble.png"/>
+    <!--chatbox embed/end-->
+
+  </body>
+</html>
+<!--end of file-->

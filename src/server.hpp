@@ -53,7 +53,11 @@ class server {
   public:
     http_server*     Http_Server;
     client           Db_Client;
+    client           Db_Client_Reviver;
+    client           Db_Client_Distributor;
     vector<crawler*> Crawlers;
+    long             Last_Revive_Count;
+    long             Last_Distribution_Count;
 
   //public constructor and methods
   public:
@@ -62,14 +66,26 @@ class server {
 
     //url handlers
     static void handle_get_root(response Response,request Request);
+    static void handle_get_admin(response Response,request Request);
+    static void handle_get_file(response Response,request Request);
     static void handle_post_webloc_add(response Response,request Request);
+    static void handle_post_webloc_crawl(response Response,request Request);
+    static void handle_post_crawlers_statuses(
+                response Response,request Request);
+    static void handle_post_crawlers_queues_clear(
+                response Response,request Request);
+    static void handle_post_search(response Response,request Request);
+    static void handle_post_tip(response Response,request Request);
+    static void handle_post_chat(response Response,request Request);
 
     //methods
     void create_indices();
+    void test_neunet();
     void initialise();
     void update_past_weblocs();
     bool is_not_queued(webloc* Webloc);
     void queue_weblocs();
+    void queue_single_webloc(webloc* Webloc);
     void run();
 };
 

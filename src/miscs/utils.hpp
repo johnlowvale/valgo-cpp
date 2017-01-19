@@ -19,6 +19,7 @@
 #include <client_http.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <bsoncxx/types.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
 #include <uriparser/Uri.h>
 
 //in-project headers
@@ -31,6 +32,7 @@ using namespace std;
 //library namespaces being used
 using namespace boost;
 using namespace boost::property_tree;
+using namespace mongocxx;
 using namespace SimpleWeb;
 using bsoncxx::types::b_date;
 
@@ -65,6 +67,7 @@ namespace Miscs {
       static moment now();
       static long   get_timezone_offset();
       static int64  milliseconds_since_epoch();
+      static void   print_db_exception(operation_exception& Exception);
 
       //http request and response related
       static string get_request_header(request Request,const char* Header);
@@ -78,6 +81,7 @@ namespace Miscs {
       static string http_post(string Server,string Path,string Body);
 
       //url & html
+      static void    to_lower(string& Str);
       static string  wstring_to_string(wstring& Wstring);
       static wstring string_to_wstring(string& String);
       static string  path_segments_to_str(UriPathSegmentA* Segment);
@@ -87,9 +91,22 @@ namespace Miscs {
       static ptree   parse_html(string Html);
 
       //miscellaneous methods
-      static void print(char const* Text);
-      static void print(string Text);
-      static void print_request(request Request);
+      static void   print(char const* Text);
+      static void   print(string Text);
+      static void   print_request(request Request);
+      static double random();
+      static string tidy_up(string Str);
+      static bool   is_double(string Str);
+      static double to_double(string Str);
+
+      //file operations
+      static string read_file(string Path);
+      static string get_current_dir();
+
+      //neural network related
+      static double sigmoid(double X);
+      static double dsigmoid(double X);
+      static double scalar_product(vector<double> Left,vector<double> Right);
   };//class
 
 }//namespace path

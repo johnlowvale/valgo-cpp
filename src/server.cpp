@@ -7,7 +7,10 @@
  */
 
 //standard c++ headers
+#include <climits>
+#include <ios>
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <stdio.h>
 #include <string>
@@ -17,6 +20,7 @@
 //library headers
 #include <server_http.hpp>
 #include <boost/any.hpp>
+#include <boost/algorithm/string.hpp>
 #include <bsoncxx/json.hpp>
 #include <mongocxx/cursor.hpp>
 #include <mongocxx/exception/operation_exception.hpp>
@@ -25,6 +29,10 @@
 #include <consts.hpp>
 #include <server.hpp>
 #include <types.hpp>
+#include <algos/chatting/chatter.hpp>
+#include <algos/learning/neunet.hpp>
+#include <algos/searching/searcher.hpp>
+#include <algos/tipping/tipper.hpp>
 #include <entities/webloc.hpp>
 #include <miscs/db.hpp>
 #include <miscs/utils.hpp>
@@ -45,6 +53,10 @@ using bsoncxx::to_json;
 using bsoncxx::types::b_date;
 
 //in-project namespaces
+using namespace Algos::Chatting;
+using namespace Algos::Learning;
+using namespace Algos::Searching;
+using namespace Algos::Tipping;
 using namespace Entities;
 using namespace Miscs;
 using namespace Tasks;
@@ -60,7 +72,11 @@ server* server::Singleton     = nullptr;
  */
 server::server() {
   server::Singleton = this;
-  this->Http_Server = new http_server(server::PORT,1);
+
+  //instantial properties
+  this->Http_Server             = new http_server(server::PORT,1);
+  this->Last_Revive_Count       = 0;
+  this->Last_Distribution_Count = 0;
 }
 
 /**
@@ -79,6 +95,60 @@ void server::handle_get_root(response Response,request Request) {
   //response text
   string Content = "vAlgo++ Server v"+server::VERSION;
   cout <<Content <<endl;
+
+  //respond
+  utils::send_text(Response,Content);
+}
+
+/**
+ * Handle admin URL
+ */
+void server::handle_get_admin(response Response,request Request) {
+  utils::print_request(Request);
+  
+  //read js/css/html files
+  string Js   = utils::read_file("../ui/index.js");
+  string Css  = utils::read_file("../ui/index.css");
+  string Html = utils::read_file("../ui/index.html");
+
+  //put js/css into html
+  replace_first(
+    Html,
+    "<script src=\"index.js\"></script>",
+    "<script>"+Js+"</script>"
+  );
+
+  replace_first(
+    Html,
+    "<link rel=\"stylesheet\" href=\"index.css\"/>",
+    "<style>"+Css+"</style>"
+  );
+
+  //respond
+  utils::send_text(Response,Html);
+}
+
+/**
+ * Handle file URL
+ */
+void server::handle_get_file(response Response,request Request) {
+  utils::print_request(Request);
+  
+  //get file path from url
+  stringstream Stream;
+  Stream <<Request->path;
+  string Path = Stream.str();
+
+  //remove the heading
+  replace_first(Path,"/file/","");
+
+  //get file content
+  string Content = utils::read_file("../files/"+Path);
+  stringstream Out;
+  Out <<"Serving file " <<Path <<endl;
+  Out <<"File length: " <<Content.length() <<endl;
+  cout <<Out.str();
+  cout.flush();
 
   //respond
   utils::send_text(Response,Content);
@@ -120,19 +190,255 @@ void server::handle_post_webloc_add(response Response,request Request) {
 }
 
 /**
+ * Handle /webloc/crawl URL
+ */
+void server::handle_post_webloc_crawl(response Response,request Request) {
+  utils::print_request(Request);
+
+  //get request data
+  ptree  Content      = utils::get_request_content_ptree(Request);
+  string Full_Url     = Content.get<string>("Full_Url");
+  float  Revisit_Time = Content.get<float>("Revisit_Time");
+
+  //log
+  cout <<"Full URL: " <<Full_Url <<endl;
+  cout <<"Revisit Time: " <<Revisit_Time <<" hour(s)" <<endl;
+  cout.flush();
+  
+  //add to db
+  webloc* Webloc = new webloc(Full_Url,Revisit_Time);
+  string Result = Webloc->save_to_db(server::Singleton->Db_Client,0);
+
+  //update Revisit_At
+  value Find_Val = document{}
+  <<"_id" <<Full_Url
+  <<finalize;
+
+  value Update_Val = document{}
+  <<"$set"
+  <<open_document
+    <<"Revisit_At" <<utils::now_as_bdate()
+  <<close_document
+  <<finalize;
+
+  db::update_one(server::Singleton->Db_Client,"weblocs",Find_Val,Update_Val);
+
+  //tell distributor thread to queue this webloc to certain crawler
+  server::Singleton->queue_single_webloc(Webloc);
+
+  utils::send_json(Response,JSON_MESSAGE_OK);
+}
+
+/**
+ * Handle /crawlers/statuses URL
+ */
+void server::handle_post_crawlers_statuses(response Response,request Request) {
+  utils::print_request(Request);
+
+  //get request data
+  ptree Content = utils::get_request_content_ptree(Request);
+
+  //statuses of crawlers
+  ptree Statuses;
+  for (long Index=0; Index<server::CRAWLER_COUNT; Index++) {
+    crawler* Crawler = server::Singleton->Crawlers[Index];
+    ptree    Status;
+
+    Status.put("Index",       Index);
+    Status.put("Queue_Length",Crawler->Queue.size());
+    Status.put("Current_Url", Crawler->Current_Url);
+
+    Statuses.push_back(make_pair("",Status));
+  }
+
+  //reviver infos
+  ptree Reviver;
+  Reviver.put("Last_Count",server::Singleton->Last_Revive_Count);
+
+  //url distributor infos
+  ptree Distributor;
+  Distributor.put("Last_Count",server::Singleton->Last_Distribution_Count);
+
+  //result
+  ptree Result;  
+  Result.add_child("Crawlers",   Statuses);
+  Result.add_child("Reviver",    Reviver);
+  Result.add_child("Distributor",Distributor);
+
+  //log
+  string Json_Str = utils::dump_to_json_str(Result);
+  cout <<"\nCrawlers' statuses:" <<endl;
+  cout <<Json_Str <<endl;
+
+  utils::send_json(Response,Json_Str);
+}
+
+/**
+ * Handle /crawlers/queues/clear URLs
+ */
+void server::handle_post_crawlers_queues_clear(
+response Response,request Request) {
+  utils::print_request(Request);
+
+  //get request data
+  ptree Content = utils::get_request_content_ptree(Request);
+
+  //log
+  stringstream Out;
+
+  //clear all crawlers' queues
+  for (long Index=0; Index<server::CRAWLER_COUNT; Index++) {
+    crawler* Crawler = server::Singleton->Crawlers[Index];
+
+    Out <<"Clearing " <<Crawler->Queue.size() <<" URL(s) from crawler "
+    <<Index <<endl;
+
+    if (Crawler->Queue.size()>0)
+      Crawler->Need_To_Clear_Queue = true;
+  }
+
+  //log
+  Out <<"Clearing messages sent." <<endl;
+  cout <<Out.str();
+  cout.flush();
+
+  utils::send_json(Response,JSON_MESSAGE_OK);
+}
+
+/**
+ * Handle /search URL
+ */
+void server::handle_post_search(response Response,request Request) {
+  searcher Searcher(
+    server::Singleton->Db_Client,Request,Response
+  );
+
+  //start new thread
+  thread Searcher_Thread(&searcher::run,&Searcher);
+  Searcher_Thread.join();
+
+  //not to detach here coz detaching the thread means running out of this
+  //method and the 2 variables Response, Request will be disposed.
+}
+
+/**
+ * Handle /tip URL
+ */
+void server::handle_post_tip(response Response,request Request) {
+  tipper Tipper(
+    server::Singleton->Db_Client,Request,Response
+  );
+
+  //start new thread
+  thread Tipper_Thread(&tipper::run,&Tipper);
+  Tipper_Thread.join();
+
+  //not to detach here coz detaching the thread means running out of this
+  //method and the 2 variables Response, Request will be disposed.
+}
+
+/**
+ * Handle /chat URL
+ */
+void server::handle_post_chat(response Response,request Request) {
+  chatter Chatter(
+    server::Singleton->Db_Client,Request,Response
+  );
+
+  //start new thread
+  thread Chatter_Thread(&chatter::run,&Chatter);
+  Chatter_Thread.join();
+
+  //not to detach here coz detaching the thread means running out of this
+  //method and the 2 variables Response, Request will be disposed.
+}
+
+/**
  * Create indices in db
  */
 void server::create_indices() {
   cout <<"\nCreating indices in DB..." <<endl;
 
-  //weblocs
+  //weblocs (web locations for crawlers)
   cout <<"weblocs.Revisit_At" <<endl;
   db::create_index(this->Db_Client,"weblocs","Revisit_At",R"({
     "Revisit_At": 1
   })");
 
+  //contents (contents saved by crawlers)
+  cout <<"contents.*" <<endl;
+  db::create_index(this->Db_Client,"contents","Wildcard",R"({
+    "$**": "text"
+  })");  
+
+  //relations (relations between nodes for chatting, reasoning)
+  cout <<"relations.Language+Left+Name+Right" <<endl;
+  db::create_index(this->Db_Client,"relations","Language_Left_Name_Right",R"({
+    "Language": 1,
+    "Left":     1,
+    "Name":     1,
+    "Right":    1
+  })");
+
+  //concerns (concerning terms of different AI beings, or chatbots)
+  cout <<"concerns.Ai_Name" <<endl;
+  db::create_index(this->Db_Client,"concerns","Ai_Name",R"({
+    "Ai_Name": 1
+  })");  
+
   cout <<"Indices created." <<endl <<endl;
 }
+
+/**
+ * Test neural network
+ */
+void server::test_neunet() {
+  cout <<"\nNeunet test..." <<endl;
+
+  //neural network of 2 layers for logic 'and' operation
+  //inputs: 2 values
+  //first layer: 2 neurons
+  //last layer (second layer): 1 neuron
+  neunet Neunet(2,(vector<long>){2,1});
+
+  //training data for logic 'and'
+  vector<sample> Samples;
+  Samples.push_back(sample{ {0,0}, {0} });
+  Samples.push_back(sample{ {0,1}, {0} });
+  Samples.push_back(sample{ {1,0}, {0} });
+  Samples.push_back(sample{ {1,1}, {1} });
+
+  //train weights using the above samples
+  double Learning_Rate            = 0.1;
+  double Momentum                 = 0.1;
+  double Acceptable_Average_Error = 0.01;
+
+  long Set_Iteration_Count = Neunet.train_weights(
+    Samples,Learning_Rate,Momentum,Acceptable_Average_Error
+  );
+
+  long Sample_Iteration_Count = Set_Iteration_Count*Samples.size();
+  cout <<"Acceptable average error:   " <<Acceptable_Average_Error <<endl;
+  cout <<"Training set samples:       " <<Samples.size() <<endl;
+  cout <<"Training set iterations:    " <<Set_Iteration_Count <<endl;
+  cout <<"Training sample iterations: " <<Sample_Iteration_Count <<endl;
+
+  //check using training data
+  for (long Index=0; Index<(long)Samples.size(); Index++) {
+    sample         Sample = Samples[Index];
+    vector<double> Output = Neunet.feedforward(Sample.first);
+
+    //inputs
+    cout <<Sample.first[0]<<" and "<<Sample.first[1]<<" --> ";
+
+    //output (close value)
+    cout <<fixed <<showpos <<Output[0] <<noshowpos;
+    cout.unsetf(ios_base::fixed);
+
+    //output (rounded value)
+    cout <<" --> " <<(long)round(Output[0]) <<endl;
+  }
+}//test neunet
 
 /**
  * Initialise server
@@ -143,8 +449,13 @@ void server::initialise() {
   cout <<"vAlgo++ Server v" <<server::VERSION <<"\n";
   cout <<"Copyright (c) Abivin JSC\n";
 
+  //test neural net
+  this->test_neunet();
+
   //create db connection
-  this->Db_Client = db::get_client();
+  this->Db_Client             = db::get_client();
+  this->Db_Client_Reviver     = db::get_client();
+  this->Db_Client_Distributor = db::get_client();
 
   //create indices
   this->create_indices();
@@ -153,8 +464,32 @@ void server::initialise() {
   this->Http_Server->resource["^/$"]["GET"] = 
   server::handle_get_root;
 
+  this->Http_Server->resource["^/admin$"]["GET"] = 
+  server::handle_get_admin;
+
+  this->Http_Server->resource["^/file/.+$"]["GET"] = 
+  server::handle_get_file;
+
   this->Http_Server->resource["^/webloc/add$"]["POST"] = 
   server::handle_post_webloc_add;
+
+  this->Http_Server->resource["^/webloc/crawl$"]["POST"] = 
+  server::handle_post_webloc_crawl;
+
+  this->Http_Server->resource["^/crawlers/statuses$"]["POST"] = 
+  server::handle_post_crawlers_statuses;
+
+  this->Http_Server->resource["^/crawlers/queues/clear$"]["POST"] = 
+  server::handle_post_crawlers_queues_clear;
+
+  this->Http_Server->resource["^/search$"]["POST"] = 
+  server::handle_post_search;
+
+  this->Http_Server->resource["^/tip$"]["POST"] = 
+  server::handle_post_tip;
+
+  this->Http_Server->resource["^/chat$"]["POST"] = 
+  server::handle_post_chat;
 }
 
 /**
@@ -164,49 +499,65 @@ void server::initialise() {
  * must always be a time in the future.
  */
 void server::update_past_weblocs() {
+  while (true) {
 
-  //find weblocs with Revisit_At of time value in the past
-  value Value = document{} 
-  <<"Revisit_At"
-  <<open_document
-    <<"$lte" <<utils::now_as_bdate()
-  <<close_document
-  <<finalize;
-
-  //do finding
-  cursor Cursor = db::find(this->Db_Client,"weblocs",Value);
-
-  //update Revisit_At to make it a time in future
-  for (view View: Cursor) {
-    //int64 Revisit_At = View["Revisit_At"].get_date().to_int64();
-
-    //schedule the webloc to be visited next minute
-    int64 Revisit_At = utils::milliseconds_since_epoch()+60*1000;
-
-    //update the webloc
-    value Find_Value = document{}
-      <<"_id" <<View["_id"].get_utf8().value.to_string()
+    //find weblocs with Revisit_At of time value in the past
+    value Value = document{} 
+    <<"Revisit_At"
+    <<open_document
+      <<"$lte" <<utils::now_as_bdate()
+    <<close_document
     <<finalize;
 
-    value Update_Value = document{}
+    //do finding
+    cursor Cursor = db::find(
+      this->Db_Client_Reviver,"weblocs",Value,REVIVES_PER_MINUTE
+    );
+
+    //update Revisit_At to make it a time in future
+    long Update_Count = 0;
+    for (view View: Cursor) {
+      //int64 Revisit_At = View["Revisit_At"].get_date().to_int64();
+
+      //schedule the webloc to be visited next minute
+      int64 Revisit_At = utils::milliseconds_since_epoch()+60*1000;
+
+      //update the webloc
+      value Find_Value = document{}
+      <<"_id" <<View["_id"].get_utf8().value.to_string()
+      <<finalize;
+
+      value Update_Value = document{}
       <<"$set"
       <<open_document
         <<"Revisit_At" <<b_date(milliseconds(Revisit_At))
       <<close_document
-    <<finalize;
+      <<finalize;
 
-    try {
-      db::update_one(this->Db_Client,"weblocs",Find_Value,Update_Value);
-      cout <<"Updated visit schedule for ";
-      cout <<View["_id"].get_utf8().value.to_string() <<endl;
+      try {
+        db::update_one(
+          this->Db_Client_Reviver,"weblocs",Find_Value,Update_Value
+        );
+
+        Update_Count++;
+        //cout <<"Updated visit schedule for ";
+        //cout <<View["_id"].get_utf8().value.to_string() <<endl;
+      }
+      catch (operation_exception& Exception) {
+        cout <<"\nUpdate visit schedule failed for ";
+        cout <<View["_id"].get_utf8().value.to_string() <<endl;
+        cout <<to_json(Exception.raw_server_error().value()) <<endl;
+      }
     }
-    catch (operation_exception& Exception) {
-      cout <<"Update visit schedule failed for ";
-      cout <<View["_id"].get_utf8().value.to_string() <<endl;
-      cout <<to_json(Exception.raw_server_error().value()) <<endl;
-    }
-  }
-}
+
+    //log
+    this->Last_Revive_Count = Update_Count;
+    cout <<"\nUpdated schedules for " <<Update_Count <<" URL(s)" <<endl;
+
+    //sleep for a minute
+    this_thread::sleep_for(milliseconds(ONE_HOUR_MILLI/60));
+  }//while
+}//update_past_weblocs
 
 /**
  * Check if a webloc is not yet queued in any crawler thread
@@ -261,7 +612,7 @@ void server::queue_weblocs() {
     <<finalize;
 
     //get the result cursor
-    cursor Cursor = db::find(this->Db_Client,"weblocs",Find_Value);
+    cursor Cursor = db::find(this->Db_Client_Distributor,"weblocs",Find_Value);
 
     //loop thru' documents found
     long Webloc_Count  = 0;
@@ -290,6 +641,7 @@ void server::queue_weblocs() {
     }
 
     //log
+    this->Last_Distribution_Count = Webloc_Count;
     Out <<"Queued " <<Webloc_Count <<" web location(s)" <<endl;
     cout <<Out.str();
     cout.flush();
@@ -304,10 +656,32 @@ void server::queue_weblocs() {
 }
 
 /**
+ * Queue a single webloc to a crawler
+ */
+void server::queue_single_webloc(webloc* Webloc) {
+  long     Min_Queue_Length = LONG_MAX;
+  crawler* Min_Crawler      = nullptr; 
+
+  //find crawler with fewest weblocs in queue
+  for (long Index=0; Index<server::CRAWLER_COUNT; Index++) {
+    if (this->Crawlers[Index]->Queue.size()<(unsigned long)Min_Queue_Length) {
+      Min_Queue_Length = this->Crawlers[Index]->Queue.size();
+      Min_Crawler      = this->Crawlers[Index];
+    }
+  }//for
+
+  //enqueue to the crawler with min queue length
+  Min_Crawler->Queue[Webloc->Id] = Webloc;
+}
+
+/**
  * Run server
  */
 void server::run() {
-  this->update_past_weblocs();
+
+  //thread for reviving webloc with Revisit_At of time in the past
+  thread Webloc_Revive_Thread(&server::update_past_weblocs,this);
+  Webloc_Revive_Thread.detach();
 
   //crawler threads
   for (long Index=0; Index<server::CRAWLER_COUNT; Index++) {
@@ -332,6 +706,21 @@ void server::run() {
   //start web server
   cout <<"\nServer listening at port " <<to_string(server::PORT) <<"...\n";
   this->Http_Server->start();
+
+  //free resources
+  for (long Index=0; Index<server::CRAWLER_COUNT; Index++) {
+
+    //weblocs
+    for (auto Iter: this->Crawlers[Index]->Queue) {
+      delete Iter.second;
+    }
+
+    //crawler
+    delete this->Crawlers[Index];
+  }
+
+  //http server
+  delete this->Http_Server;
 }
 
 /**

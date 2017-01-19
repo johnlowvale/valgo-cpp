@@ -10,16 +10,23 @@
 #endif
 
 //standard c++ headers
+#include <cmath>
 #include <chrono>
 #include <iostream>
+#include <random>
 #include <sstream>
 #include <string>
 #include <time.h>
 
 //library headers
+#include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <bsoncxx/json.hpp>
 #include <bsoncxx/types.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
 #include <uriparser/Uri.h>
 
 //in-project headers
@@ -33,6 +40,9 @@ using namespace std::chrono;
 //library namespaces
 using namespace boost;
 using namespace boost::property_tree;
+using namespace mongocxx;
+using bsoncxx::from_json;
+using bsoncxx::to_json;
 using bsoncxx::types::b_date;
 
 //in-project namespaces
@@ -232,6 +242,18 @@ int64 utils::milliseconds_since_epoch() {
          count();
 }
 
+/**
+ * Print mongodb exception
+ */
+void utils::print_db_exception(operation_exception& Exception) {
+  stringstream Out;
+
+  Out <<"\nException:" <<endl;
+  Out <<to_json(Exception.raw_server_error().value()) <<endl;
+
+  cout <<Out.str();
+  cout.flush();
+}
 
 /**
  * Print and flush
@@ -256,6 +278,107 @@ void utils::print_request(request Request) {
   cout <<"\n" <<Request->remote_endpoint_address <<" ";
   cout <<Request->method <<" " <<Request->path <<"\n";
   cout.flush();
+}
+
+/**
+ * Get a random number in [0..1)
+ * http://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution
+ */
+double utils::random() {
+  random_device               Device;
+  mt19937                     Generator(Device());
+  uniform_real_distribution<> Distribution(0,1);
+
+  return Distribution(Generator);
+}
+
+/**
+ * Tidy up a string by removing duplicated space characters
+ */
+string utils::tidy_up(string Str) {
+  while (Str.find("  ")!=string::npos) //2 spaces
+    replace_all(Str,"  "," "); //replace 2 spaces to 1 space
+
+  trim(Str);
+  return Str;
+}
+
+/**
+ * Check if a string is double
+ */
+bool utils::is_double(string Str) {
+  try {
+    lexical_cast<double>(Str);
+    return true;
+  }
+  catch (bad_lexical_cast& Error) {
+    return false;
+  }
+}
+
+/**
+ * Convert string to double
+ */
+double utils::to_double(string Str) {
+  try {
+    double Value = lexical_cast<double>(Str);
+    return Value;
+  }
+  catch (bad_lexical_cast& Error) {
+    return 0;
+  }
+}
+
+/**
+ * Read whole file to string
+ */
+string utils::read_file(string Path) {
+
+  //open file
+  ifstream File;
+  File.open(Path);
+
+  //read file to stringstream
+  stringstream Stream;
+  Stream <<File.rdbuf(); 
+  string Str = Stream.str();
+
+  return Str;
+}
+
+/**
+ * Get current working directory
+ */
+string utils::get_current_dir() {
+  stringstream Stream;
+  Stream <<filesystem::current_path();
+  return Stream.str();
+}
+
+/**
+ * Sigmoid function used by neuron
+ */
+double utils::sigmoid(double X) {
+  return tanh(X);
+}
+
+/**
+ * Derivative of sigmoid function being used
+ */
+double utils::dsigmoid(double X) {
+  return (double)1 - (X*X);
+}
+
+/**
+ * Get scalar product of 2 vectors
+ */
+double utils::scalar_product(vector<double> Left,vector<double> Right) {
+  double Result = 0;
+
+  for (long Index=0; Index<(long)Left.size(); Index++)
+    Result += Left[Index]*Right[Index];
+
+  return Result;
 }
 
 /**
@@ -297,7 +420,7 @@ void utils::send_text(response Response,string Text) {
 void utils::send_json(response Response,string Json_Str) {
   *Response <<"HTTP/1.1 200 OK\r\n";
   *Response <<"Access-Control-Allow-Origin: *\r\n";
-  *Response <<"Content-Type: application/json\r\n";
+  *Response <<"Content-Type: application/json; charset=utf-8\r\n";
   *Response <<"Content-Length: " <<Json_Str.length() <<"\r\n";
   *Response <<"\r\n";
   *Response <<Json_Str;
@@ -336,6 +459,13 @@ string utils::http_get(const char* Server,const char* Path) {
 string utils::http_post(string Server,string Path,string Body) {
   string Result = "";
   return Result;
+}
+
+/**
+ * Convert string to lower case
+ */
+void utils::to_lower(string& Str) {
+  to_lower(Str); //boost::to_lower
 }
 
 /**
@@ -378,7 +508,6 @@ string utils::path_segments_to_str(UriPathSegmentA* Segment) {
   UriPathSegmentStructA* Head(Segment);
 
   while (Head) {
-    cout <<0; cout.flush();
     Accum += Delim+string(Head->text.first,Head->text.afterLast); 
     Head   = Head->next;
   }
@@ -401,6 +530,13 @@ long& Port,string& Path,string& Query_String) {
   State.uri = &Uri;
   if (uriParseUriA(&State,Full_Url.c_str())!=URI_SUCCESS) {
     uriFreeUriMembersA(&Uri);
+
+    Protocol.clear();
+    Domain_Name.clear();
+    Port = 0;
+    Path.clear();
+    Query_String.clear();
+
     return;
   }
 

@@ -14,6 +14,7 @@
 #include <string>
 
 //library headers
+#include <htmlcxx/html/ParserDom.h>
 #include <mongocxx/client.hpp>
 
 //in-project headers
@@ -23,6 +24,8 @@
 using namespace std;
 
 //library namespaces
+using namespace htmlcxx;
+using namespace htmlcxx::HTML;
 using namespace mongocxx;
 
 //in-project namespaces being used
@@ -42,17 +45,23 @@ namespace Tasks {
       client              Db_Client;
       map<string,webloc*> Queue;
       bool                Is_Queuing;
+      string              Current_Url;
+      bool                Need_To_Clear_Queue;
 
     //public constructors and methods
     public:
       crawler();
       crawler(long Thread_Index);
 
-      void clear_queue();
-      bool is_not_queued(webloc* Webloc);
-      void reschedule_webloc(webloc* Webloc);
-      void crawl_the_queue();
-      void run();
+      void   clear_queue();
+      bool   is_not_queued(webloc* Webloc);
+      void   reschedule_webloc(webloc* Webloc);
+      string get_inner_text(const tree<Node>& Dom,
+             const tree<Node>::iterator& Parent);
+      void   add_more_link(vector<string>& More_Links,webloc* Webloc,
+             string& Href);
+      void   crawl_the_queue();
+      void   run();
   };
 }//namespace path
 

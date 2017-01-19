@@ -3,3 +3,5 @@
 /**/*.o
 /**/*.md5
 /build
+/env.sh
+/files/chatting/images/bubble.png

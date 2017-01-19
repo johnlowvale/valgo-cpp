@@ -57,6 +57,11 @@ webloc::webloc(string Full_Url,double Revisit_Time) {
     Full_Url,
     this->Protocol,this->Domain_Name,this->Port,this->Path,this->Query_String
   ); 
+
+  if (this->Domain_Name.length()>0)
+    this->Is_Valid = true;
+  else
+    this->Is_Valid = false;
 }
 
 /** 
@@ -70,13 +75,13 @@ webloc::~webloc() {
  * Save to db
  * @return "OK" if successful, a json string representing the error otherwise
  */
-string webloc::save_to_db(client& Db_Client) {
+string webloc::save_to_db(client& Db_Client,int64 Crawl_At) {
 
   //current time
   int64 Millisecond = utils::milliseconds_since_epoch();
 
   //let it be crawled in the next hour
-  Millisecond += ONE_HOUR_MILLI;
+  Millisecond += Crawl_At;
 
   //make the webloc document
   document Document;

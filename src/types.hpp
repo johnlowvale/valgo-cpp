@@ -45,8 +45,9 @@ typedef double     double__;
 typedef __float128 float128;
 
 //shortcuts for templated types
-typedef map<string,any> mapsa;
-typedef vector<any>     veca;
+typedef map<string,any>    mapsa;
+typedef vector<any>        veca;
+typedef map<string,string> mapss;
 
 //Simple-Web-Server types
 typedef Server<HTTP> http_server;
@@ -54,6 +55,10 @@ typedef Client<HTTP> http_client;
 typedef std::shared_ptr<http_server::Response> response;
 typedef std::shared_ptr<http_server::Request>  request;
 typedef std::shared_ptr<http_client::Response> http_response;
+
+//types for neural network
+typedef vector<double>                      vecd;
+typedef pair<vector<double>,vector<double>> sample;
 
 //include guard end
 #endif

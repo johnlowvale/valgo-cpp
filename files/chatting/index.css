@@ -1,0 +1,39 @@
+/**
+ * vAlgo++ Smart Algorithm Service
+ * Copyright (c) Abivin JSC
+ * @file    Chatbot embed css file
+ * @version 0.1
+ * @author  Dat Dinhquoc
+ */
+
+#Chat-Box {
+  position:fixed; bottom:0; right:30px; width:430px;
+  height:380px; background:wheat; border:1px solid orange; display:none;
+  margin:0; padding:10px; border-radius:5px;
+}
+
+#Chat-Title {
+  float:left; line-height:20px; cursor:pointer; margin-left:2px;
+}
+
+#Chat-Title a {
+  text-decoration:none; color:black; font-family:arial;
+}
+
+#Chat-Close {
+  float:right; line-height:20px; cursor:pointer;
+}
+
+#Chat-Log {
+  width:410px; height:290px; background:ivory; overflow:auto; padding:10px;
+}
+
+#Chat-Text {
+  width:410px; height:30px; margin:0; padding:10px; resize:none;
+}
+
+#Chat-Button {
+  position:fixed; bottom:0; right:30px; width:100px; cursor:pointer;
+}
+
+/*end of file*/
